@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#000000">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>ZmZ Music</title>
+<title>Musify - Stream Your Vibe</title>
 <style>
   * {
     margin: 0; padding: 0; box-sizing: border-box;
@@ -20,6 +20,7 @@
     --green-glow: rgba(30, 215, 96, 0.4);
     --purple: #7c3aed;
     --blue: #0ea5e9;
+    --pink: #ec4899;
     --gold: #ffd700;
     --glass-bg: rgba(255, 255, 255, 0.07);
     --glass-border: rgba(255, 255, 255, 0.12);
@@ -74,7 +75,7 @@
     66% { transform: translate(-40px, 60px) scale(0.9); }
   }
 
-  /* ===== APP CONTAINER ===== */
+  /* ===== APP ===== */
   .app {
     height: 100vh;
     height: 100dvh;
@@ -86,7 +87,7 @@
     overflow: hidden;
   }
 
-  /* ===== TOP BAR (GLASS) ===== */
+  /* ===== TOP BAR ===== */
   .top-bar {
     position: sticky;
     top: 0;
@@ -106,28 +107,60 @@
     align-items: center;
     gap: 8px;
     font-size: 18px;
-    font-weight: 800;
-    letter-spacing: -0.4px;
+    font-weight: 900;
+    letter-spacing: -0.5px;
   }
 
   .logo-mark {
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--green), #14a44d);
+    background: linear-gradient(135deg, var(--green), var(--blue), var(--purple));
+    background-size: 200% 200%;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #000;
     font-size: 16px;
     font-weight: 900;
-    box-shadow: 0 0 20px var(--green-glow);
-    animation: logoPulse 3s ease infinite;
+    box-shadow: 0 0 24px var(--green-glow);
+    animation: logoPulse 3s ease infinite, logoGradient 4s ease infinite;
   }
 
   @keyframes logoPulse {
-    0%, 100% { box-shadow: 0 0 20px var(--green-glow); }
-    50% { box-shadow: 0 0 30px var(--green-glow), 0 0 40px var(--green-glow); }
+    0%, 100% { box-shadow: 0 0 24px var(--green-glow); }
+    50% { box-shadow: 0 0 40px var(--green-glow), 0 0 60px var(--green-glow); }
+  }
+
+  @keyframes logoGradient {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  .logo-text {
+    background: linear-gradient(135deg, #fff, var(--green));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .h4xx-tag {
+    font-size: 9px;
+    font-weight: 900;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: linear-gradient(135deg, var(--pink), var(--purple));
+    color: #fff;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-left: 4px;
+    box-shadow: 0 0 12px rgba(236, 72, 153, 0.6);
+    animation: h4xxGlow 2s ease infinite;
+  }
+
+  @keyframes h4xxGlow {
+    0%, 100% { box-shadow: 0 0 12px rgba(236, 72, 153, 0.6); }
+    50% { box-shadow: 0 0 24px rgba(236, 72, 153, 0.9), 0 0 40px rgba(124, 58, 237, 0.6); }
   }
 
   .premium-badge {
@@ -170,7 +203,7 @@
 
   .top-icon-btn:active { transform: scale(0.9); background: var(--glass-hover); }
 
-  /* ===== SEARCH BAR ===== */
+  /* ===== SEARCH ===== */
   .search-wrap {
     padding: 12px 20px 8px;
     transition: 0.3s;
@@ -247,7 +280,7 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
-  /* ===== HERO GREETING ===== */
+  /* ===== GREETING ===== */
   .greeting {
     padding: 16px 20px 8px;
   }
@@ -422,60 +455,6 @@
     text-overflow: ellipsis;
   }
 
-  /* ===== HORIZONTAL SCROLL ===== */
-  .h-scroll {
-    display: flex;
-    gap: 12px;
-    overflow-x: auto;
-    padding: 0 20px 8px;
-    scroll-snap-type: x mandatory;
-    scrollbar-width: none;
-  }
-  .h-scroll::-webkit-scrollbar { display: none; }
-
-  .h-card {
-    flex-shrink: 0;
-    width: 140px;
-    background: var(--glass-bg);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid var(--glass-border);
-    border-radius: 14px;
-    padding: 10px;
-    cursor: pointer;
-    transition: 0.2s;
-    scroll-snap-align: start;
-  }
-
-  .h-card:active { transform: scale(0.95); }
-
-  .h-card .h-img {
-    width: 100%;
-    aspect-ratio: 1;
-    border-radius: 10px;
-    overflow: hidden;
-    margin-bottom: 8px;
-    background: linear-gradient(135deg, rgba(30,215,96,0.3), rgba(124,58,237,0.3));
-  }
-
-  .h-card .h-img img { width: 100%; height: 100%; object-fit: cover; }
-
-  .h-card .h-title {
-    font-size: 12px;
-    font-weight: 600;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .h-card .h-sub {
-    font-size: 10px;
-    color: var(--text-sub);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
   /* ===== LIBRARY ===== */
   .lib-item {
     display: flex;
@@ -537,7 +516,7 @@
 
   .lib-action:active { transform: scale(0.9); color: #fff; }
 
-  /* ===== PREMIUM PAGE ===== */
+  /* ===== PREMIUM ===== */
   .premium-hero {
     margin: 20px;
     padding: 36px 24px 32px;
@@ -774,7 +753,7 @@
   .pf-text .t { font-size: 13px; font-weight: 600; }
   .pf-text .s { font-size: 11px; color: var(--text-sub); }
 
-  /* ===== PROFILE PAGE ===== */
+  /* ===== PROFILE ===== */
   .profile-header {
     display: flex;
     flex-direction: column;
@@ -787,7 +766,8 @@
     width: 100px;
     height: 100px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--green), var(--purple));
+    background: linear-gradient(135deg, var(--green), var(--purple), var(--pink));
+    background-size: 200% 200%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -799,6 +779,7 @@
     box-shadow: 0 8px 32px var(--green-glow);
     position: relative;
     cursor: pointer;
+    animation: logoGradient 4s ease infinite;
   }
 
   .profile-avatar::after {
@@ -824,6 +805,14 @@
     font-weight: 900;
     margin-bottom: 4px;
     letter-spacing: -0.4px;
+  }
+
+  .profile-username {
+    font-size: 13px;
+    color: var(--green);
+    font-weight: 700;
+    margin-bottom: 4px;
+    font-family: 'Courier New', monospace;
   }
 
   .profile-sub {
@@ -918,7 +907,7 @@
   /* ===== PLAYER BAR ===== */
   .player-bar {
     position: fixed;
-    bottom: calc(var(--nav-height) + 8px);
+    bottom: calc(var(--nav-height) + 8px + var(--safe-bottom));
     left: 50%;
     transform: translateX(-50%) translateY(0);
     width: calc(100% - 24px);
@@ -936,6 +925,7 @@
     box-shadow: 0 12px 40px rgba(0,0,0,0.5);
     transition: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     overflow: hidden;
+    cursor: pointer;
   }
 
   .player-bar.hidden {
@@ -1081,9 +1071,7 @@
     box-shadow: 0 0 12px var(--green);
   }
 
-  .nav-btn.premium {
-    color: var(--gold);
-  }
+  .nav-btn.premium { color: var(--gold); }
 
   .nav-btn.premium.active { color: var(--gold); }
   .nav-btn.premium.active::before { background: var(--gold); box-shadow: 0 0 12px var(--gold); }
@@ -1246,33 +1234,6 @@
   .empty-state .t { font-size: 14px; font-weight: 600; margin-bottom: 4px; color: var(--text); }
   .empty-state .s { font-size: 12px; }
 
-  /* ===== EQUALIZER ANIMATION ===== */
-  .eq {
-    display: inline-flex;
-    align-items: flex-end;
-    gap: 2px;
-    height: 14px;
-  }
-
-  .eq span {
-    width: 3px;
-    background: var(--green);
-    border-radius: 2px;
-    animation: eqAnim 0.8s ease infinite;
-  }
-
-  .eq span:nth-child(1) { animation-delay: 0s; }
-  .eq span:nth-child(2) { animation-delay: 0.15s; }
-  .eq span:nth-child(3) { animation-delay: 0.3s; }
-  .eq span:nth-child(4) { animation-delay: 0.45s; }
-
-  @keyframes eqAnim {
-    0%, 100% { height: 4px; }
-    50% { height: 14px; }
-  }
-
-  #yt-player { position: fixed; left: -9999px; width: 1px; height: 1px; }
-
   /* ===== NOW PLAYING MODAL ===== */
   .now-playing-modal {
     position: fixed;
@@ -1412,7 +1373,118 @@
 
   .np-extra .np-ctrl { font-size: 18px; }
 
-  /* ===== RESPONSIVE ===== */
+  /* ===== EQUALIZER ===== */
+  .eq {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 14px;
+  }
+
+  .eq span {
+    width: 3px;
+    background: var(--green);
+    border-radius: 2px;
+    animation: eqAnim 0.8s ease infinite;
+  }
+
+  .eq span:nth-child(1) { animation-delay: 0s; }
+  .eq span:nth-child(2) { animation-delay: 0.15s; }
+  .eq span:nth-child(3) { animation-delay: 0.3s; }
+  .eq span:nth-child(4) { animation-delay: 0.45s; }
+
+  @keyframes eqAnim {
+    0%, 100% { height: 4px; }
+    50% { height: 14px; }
+  }
+
+  /* ===== HORIZONTAL SCROLL ===== */
+  .h-scroll {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding: 0 20px 8px;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+  .h-scroll::-webkit-scrollbar { display: none; }
+
+  .h-card {
+    flex-shrink: 0;
+    width: 140px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    padding: 10px;
+    cursor: pointer;
+    transition: 0.2s;
+    scroll-snap-align: start;
+  }
+
+  .h-card:active { transform: scale(0.95); }
+
+  .h-card .h-img {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, rgba(30,215,96,0.3), rgba(124,58,237,0.3));
+  }
+
+  .h-card .h-img img { width: 100%; height: 100%; object-fit: cover; }
+
+  .h-card .h-title {
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .h-card .h-sub {
+    font-size: 10px;
+    color: var(--text-sub);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ===== STATS BANNER ===== */
+  .stats-banner {
+    margin: 0 20px 16px;
+    padding: 16px;
+    background: linear-gradient(135deg, rgba(30,215,96,0.15), rgba(124,58,237,0.15));
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    display: flex;
+    justify-content: space-around;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  .stats-banner .sb {
+    text-align: center;
+  }
+
+  .stats-banner .sb-num {
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--green);
+  }
+
+  .stats-banner .sb-label {
+    font-size: 10px;
+    color: var(--text-sub);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+  }
+
+  #yt-player { position: fixed; left: -9999px; width: 1px; height: 1px; }
+
   @media (min-width: 481px) {
     .app { border-left: 1px solid var(--glass-border); border-right: 1px solid var(--glass-border); }
   }
@@ -1432,16 +1504,17 @@
   <div class="top-bar">
     <div class="logo">
       <div class="logo-mark">♪</div>
-      <span>ZmZ</span>
+      <span class="logo-text">Musify</span>
+      <span class="h4xx-tag">H4XX</span>
       <span class="premium-badge" id="premium-badge-top">👑 PRO</span>
     </div>
     <div class="top-actions">
-      <button class="top-icon-btn" onclick="toggleTheme()" id="theme-btn" title="Toggle EQ">🎛️</button>
-      <div class="user-mini top-icon-btn" onclick="switchPage('profile')" style="background: linear-gradient(135deg, var(--green), var(--purple)); color: #000; font-weight: 900;">Z</div>
+      <button class="top-icon-btn" onclick="showEqModal()" title="Equalizer">🎛️</button>
+      <div class="top-icon-btn" onclick="switchPage('profile')" style="background: linear-gradient(135deg, var(--green), var(--purple)); color: #000; font-weight: 900;">Z</div>
     </div>
   </div>
 
-  <!-- SEARCH BAR -->
+  <!-- SEARCH -->
   <div class="search-wrap" id="search-wrap">
     <div class="search-bar">
       <span class="icon">🔍</span>
@@ -1458,6 +1531,21 @@
       <div class="greeting">
         <h1>Hai, <span class="highlight" id="greeting-name">ZmZ</span> 👋</h1>
         <p id="greeting-sub">Mau dengerin apa hari ini?</p>
+      </div>
+
+      <div class="stats-banner">
+        <div class="sb">
+          <div class="sb-num" id="sb-fav">0</div>
+          <div class="sb-label">Favorit</div>
+        </div>
+        <div class="sb">
+          <div class="sb-num" id="sb-recent">0</div>
+          <div class="sb-label">Recent</div>
+        </div>
+        <div class="sb">
+          <div class="sb-num" id="sb-playlist">5</div>
+          <div class="sb-label">Playlist</div>
+        </div>
       </div>
 
       <div class="hero-grid" id="hero-grid"></div>
@@ -1486,7 +1574,12 @@
       </div>
 
       <div class="section">
-        <h3 style="font-size: 14px; font-weight: 700; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">Genre Populer</h3>
+        <h3 style="font-size: 14px; font-weight: 700; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">🎯 Trending Search</h3>
+        <div class="hero-grid" id="trending-search-grid"></div>
+      </div>
+
+      <div class="section">
+        <h3 style="font-size: 14px; font-weight: 700; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">🎵 Genre Populer</h3>
         <div class="hero-grid" id="genre-grid"></div>
       </div>
 
@@ -1518,13 +1611,18 @@
         <h3 style="font-size: 12px; font-weight: 800; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">🕐 Recent</h3>
         <div id="recent-list"><div class="empty-state"><div class="ico">🕐</div><div class="t">Belum ada riwayat</div><div class="s">Lagu yang lo play bakal muncul di sini</div></div></div>
       </div>
+
+      <div class="section">
+        <h3 style="font-size: 12px; font-weight: 800; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">⏬ Downloaded</h3>
+        <div id="downloads-list"><div class="empty-state"><div class="ico">⏬</div><div class="t">Belum ada download</div><div class="s">Fitur download cuma buat Premium</div></div></div>
+      </div>
     </div>
 
     <!-- PREMIUM -->
     <div class="page" id="page-premium">
       <div class="premium-hero">
         <div class="premium-crown">👑</div>
-        <div class="premium-title">ZmZ Premium</div>
+        <div class="premium-title">Musify Premium</div>
         <div class="premium-sub">Dengerin tanpa batas. Tanpa iklan. Kualitas maksimal.</div>
       </div>
 
@@ -1532,35 +1630,23 @@
 
       <div class="premium-features">
         <h3>✨ Fitur Premium</h3>
-        <div class="pf-item">
-          <div class="pf-icon">🚫</div>
-          <div class="pf-text"><div class="t">Bebas Iklan</div><div class="s">Nggak ada gangguan iklan</div></div>
-        </div>
-        <div class="pf-item">
-          <div class="pf-icon">🎵</div>
-          <div class="pf-text"><div class="t">Audio 320kbps</div><div class="s">Kualitas maksimal</div></div>
-        </div>
-        <div class="pf-item">
-          <div class="pf-icon">📥</div>
-          <div class="pf-text"><div class="t">Download Offline</div><div class="s">Dengerin tanpa internet</div></div>
-        </div>
-        <div class="pf-item">
-          <div class="pf-icon">⏭</div>
-          <div class="pf-text"><div class="t">Skip Unlimited</div><div class="s">Bebas skip lagu</div></div>
-        </div>
-        <div class="pf-item">
-          <div class="pf-icon">🎛️</div>
-          <div class="pf-text"><div class="t">Equalizer Advanced</div><div class="s">Atur suara sesuai selera</div></div>
-        </div>
+        <div class="pf-item"><div class="pf-icon">🚫</div><div class="pf-text"><div class="t">Bebas Iklan</div><div class="s">Nggak ada gangguan iklan</div></div></div>
+        <div class="pf-item"><div class="pf-icon">🎵</div><div class="pf-text"><div class="t">Audio 320kbps</div><div class="s">Kualitas maksimal</div></div></div>
+        <div class="pf-item"><div class="pf-icon">📥</div><div class="pf-text"><div class="t">Download Offline</div><div class="s">Dengerin tanpa internet</div></div></div>
+        <div class="pf-item"><div class="pf-icon">⏭</div><div class="pf-text"><div class="t">Skip Unlimited</div><div class="s">Bebas skip lagu</div></div></div>
+        <div class="pf-item"><div class="pf-icon">🎛️</div><div class="pf-text"><div class="t">Equalizer Advanced</div><div class="s">Atur suara sesuai selera</div></div></div>
+        <div class="pf-item"><div class="pf-icon">🎤</div><div class="pf-text"><div class="t">Lyrics Real-time</div><div class="s">Lirik sync sama lagu</div></div></div>
+        <div class="pf-item"><div class="pf-icon">📊</div><div class="pf-text"><div class="t">Listening Stats</div><div class="s">Statistik dengerin lo</div></div></div>
       </div>
     </div>
 
     <!-- PROFILE -->
     <div class="page" id="page-profile">
       <div class="profile-header">
-        <div class="profile-avatar" onclick="showToast('📷 Ganti foto profil')">Z</div>
+        <div class="profile-avatar" onclick="editProfile()">Z</div>
         <div class="profile-name" id="profile-name">ZmZ User</div>
-        <div class="profile-sub" id="profile-email">user@zmz.music</div>
+        <div class="profile-username" id="profile-username">@h4xx_zmz</div>
+        <div class="profile-sub" id="profile-email">user@musify.h4xx</div>
         <div class="profile-plan-badge free" id="profile-plan-badge">FREE PLAN</div>
         <div class="profile-stats">
           <div class="stat"><div class="stat-num" id="stat-fav">0</div><div class="stat-label">Favorit</div></div>
@@ -1575,25 +1661,40 @@
           <div class="menu-text"><div class="title">Upgrade ke Premium</div><div class="sub">Nikmati fitur tanpa batas</div></div>
           <span class="menu-arrow">›</span>
         </div>
+        <div class="menu-item" onclick="showStats()">
+          <div class="menu-icon">📊</div>
+          <div class="menu-text"><div class="title">Listening Stats</div><div class="sub">Total lagu & waktu dengerin</div></div>
+          <span class="menu-arrow">›</span>
+        </div>
+        <div class="menu-item" onclick="showEqModal()">
+          <div class="menu-icon">🎛️</div>
+          <div class="menu-text"><div class="title">Equalizer</div><div class="sub">Atur bass, treble, vocal</div></div>
+          <span class="menu-arrow">›</span>
+        </div>
+        <div class="menu-item" onclick="editProfile()">
+          <div class="menu-icon">✏️</div>
+          <div class="menu-text"><div class="title">Edit Profile</div><div class="sub">Ganti nama & username</div></div>
+          <span class="menu-arrow">›</span>
+        </div>
         <div class="menu-item" onclick="showToast('⚙️ Pengaturan segera hadir')">
           <div class="menu-icon">⚙️</div>
           <div class="menu-text"><div class="title">Pengaturan</div><div class="sub">Audio, tampilan, notifikasi</div></div>
           <span class="menu-arrow">›</span>
         </div>
-        <div class="menu-item" onclick="showToast('🎨 Tema segera hadir')">
-          <div class="menu-icon">🎨</div>
-          <div class="menu-text"><div class="title">Tema</div><div class="sub">Glass, Dark, Light</div></div>
+        <div class="menu-item" onclick="exportData()">
+          <div class="menu-icon">📤</div>
+          <div class="menu-text"><div class="title">Export Data</div><div class="sub">Download favorit & playlist</div></div>
           <span class="menu-arrow">›</span>
         </div>
         <div class="menu-item" onclick="clearData()">
           <div class="menu-icon">🗑️</div>
-          <div class="menu-text"><div class="title">Hapus Data</div><div class="sub">Reset favorit & recent</div></div>
+          <div class="menu-text"><div class="title">Hapus Data</div><div class="sub">Reset semua data</div></div>
           <span class="menu-arrow">›</span>
         </div>
       </div>
 
       <div class="section" style="text-align:center; padding-bottom: 40px;">
-        <p style="color: var(--text-sub); font-size: 12px;">ZmZ Music v1.0 • Made with 💚</p>
+        <p style="color: var(--text-sub); font-size: 12px;">Musify v2.0 • Made with 💚 by h4xx</p>
       </div>
     </div>
 
@@ -1645,7 +1746,7 @@
   <div class="np-header">
     <button class="np-close" onclick="closeNowPlaying()">⌄</button>
     <div class="np-label">NOW PLAYING</div>
-    <div style="width: 36px;"></div>
+    <button class="np-close" onclick="showToast('📤 Share lagu')">📤</button>
   </div>
   <div class="np-art"><img id="np-img" src="" alt=""></div>
   <div class="np-title" id="np-title">-</div>
@@ -1667,7 +1768,7 @@
   <div class="np-extra">
     <button class="np-ctrl" id="np-fav" onclick="toggleFav()">♡</button>
     <button class="np-ctrl" onclick="toggleMute()" id="np-mute">🔊</button>
-    <button class="np-ctrl" onclick="showToast('📤 Share lagu')">📤</button>
+    <button class="np-ctrl" onclick="showToast('📊 Statistik lagu')">📊</button>
   </div>
 </div>
 
@@ -1702,9 +1803,15 @@ let isShuffled = false;
 let isRepeating = false;
 let progressInterval = null;
 let currentPage = 'home';
-let user = JSON.parse(localStorage.getItem('zmz_user') || '{"name":"ZmZ User","email":"user@zmz.music","premium":false,"plan":null}');
-let favorites = JSON.parse(localStorage.getItem('zmz_favorites') || '[]');
-let recent = JSON.parse(localStorage.getItem('zmz_recent') || '[]');
+let listenStartTime = null;
+let totalListenTime = parseInt(localStorage.getItem('musify_listen_time') || '0');
+let totalTracksPlayed = parseInt(localStorage.getItem('musify_tracks_played') || '0');
+
+let user = JSON.parse(localStorage.getItem('musify_user') || '{"name":"ZmZ User","username":"h4xx_zmz","email":"user@musify.h4xx","premium":false,"plan":null}');
+let favorites = JSON.parse(localStorage.getItem('musify_favorites') || '[]');
+let recent = JSON.parse(localStorage.getItem('musify_recent') || '[]');
+let downloads = JSON.parse(localStorage.getItem('musify_downloads') || '[]');
+let eqSettings = JSON.parse(localStorage.getItem('musify_eq') || '{"bass":50,"treble":50,"vocal":50}');
 
 // ================== YOUTUBE API ==================
 function loadYouTubeAPI() {
@@ -1721,7 +1828,7 @@ window.onYouTubeIframeAPIReady = function() {
       modestbranding: 1, rel: 0, playsinline: 1
     },
     events: {
-      onReady: () => console.log('✅ YT Ready'),
+      onReady: () => console.log('✅ Musify Ready'),
       onStateChange: onPlayerStateChange
     }
   });
@@ -1736,10 +1843,16 @@ function onPlayerStateChange(event) {
     isPlaying = true;
     updatePlayButtons(true);
     startProgressUpdater();
+    if (!listenStartTime) listenStartTime = Date.now();
   }
-  if (event.data === YT.PlayerState.PAUSED) {
+  if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED) {
     isPlaying = false;
     updatePlayButtons(false);
+    if (listenStartTime) {
+      totalListenTime += Math.floor((Date.now() - listenStartTime) / 1000);
+      localStorage.setItem('musify_listen_time', totalListenTime);
+      listenStartTime = null;
+    }
   }
 }
 
@@ -1755,6 +1868,7 @@ function updatePlayButtons(playing) {
 loadYouTubeAPI();
 window.addEventListener('load', () => {
   renderHero();
+  renderTrendingSearch();
   renderGenres();
   renderPremiumPlans();
   renderPlaylists();
@@ -1762,9 +1876,9 @@ window.addEventListener('load', () => {
   updateUserUI();
   updateLibraryUI();
   updateGreeting();
+  updateStatsBanner();
 });
 
-// ================== GREETING ==================
 function updateGreeting() {
   const hour = new Date().getHours();
   let greeting = 'Hai';
@@ -1796,7 +1910,7 @@ function switchPage(page) {
   document.getElementById('main-scroll').scrollTop = 0;
 }
 
-// ================== API FETCH ==================
+// ================== API ==================
 async function ytFetch(endpoint, params) {
   const url = new URL('https://www.googleapis.com/youtube/v3/' + endpoint);
   params.key = API_KEY;
@@ -1818,11 +1932,27 @@ function renderHero() {
     { title: 'K-Pop', emoji: '🌸', query: 'kpop 2026' }
   ];
 
-  const grid = document.getElementById('hero-grid');
-  grid.innerHTML = heroData.map(h => `
+  document.getElementById('hero-grid').innerHTML = heroData.map(h => `
     <div class="hero-card" onclick="doQuickSearch('${h.query.replace(/'/g, "\\'")}')">
       <div class="hero-emoji">${h.emoji}</div>
       <div class="hero-title">${h.title}</div>
+    </div>
+  `).join('');
+}
+
+// ================== TRENDING SEARCH ==================
+function renderTrendingSearch() {
+  const trending = [
+    { name: 'Viral TikTok', emoji: '📱', q: 'lagu viral tiktok 2026' },
+    { name: 'Galau', emoji: '💔', q: 'lagu galau indonesia' },
+    { name: 'Semangat', emoji: '💪', q: 'lagu semangat motivasi' },
+    { name: 'Santai', emoji: '😌', q: 'lagu santai indonesia' }
+  ];
+
+  document.getElementById('trending-search-grid').innerHTML = trending.map(t => `
+    <div class="hero-card" onclick="doQuickSearch('${t.q}')">
+      <div class="hero-emoji">${t.emoji}</div>
+      <div class="hero-title">${t.name}</div>
     </div>
   `).join('');
 }
@@ -1840,8 +1970,7 @@ function renderGenres() {
     { name: 'Reggae', emoji: '🌴', q: 'reggae' }
   ];
 
-  const grid = document.getElementById('genre-grid');
-  grid.innerHTML = genres.map(g => `
+  document.getElementById('genre-grid').innerHTML = genres.map(g => `
     <div class="hero-card" onclick="doQuickSearch('${g.q}')">
       <div class="hero-emoji">${g.emoji}</div>
       <div class="hero-title">${g.name}</div>
@@ -1851,7 +1980,6 @@ function renderGenres() {
 
 // ================== TRENDING ==================
 async function loadTrending() {
-  document.getElementById('home-section-title')?.textContent;
   const grid = document.getElementById('home-card-grid');
   grid.innerHTML = '<div class="loading">Loading lagu populer...</div>';
 
@@ -1925,7 +2053,7 @@ function clearSearch() {
   document.getElementById('search-results-section').style.display = 'none';
 }
 
-// ================== RENDER CARDS ==================
+// ================== RENDER ==================
 function renderCards(items, gridId) {
   const grid = document.getElementById(gridId);
   if (!items.length) {
@@ -1967,8 +2095,13 @@ function playTrack(index) {
   recent = recent.filter(r => r.id !== track.id);
   recent.unshift(track);
   recent = recent.slice(0, 20);
-  localStorage.setItem('zmz_recent', JSON.stringify(recent));
+  localStorage.setItem('musify_recent', JSON.stringify(recent));
+
+  totalTracksPlayed++;
+  localStorage.setItem('musify_tracks_played', totalTracksPlayed);
+
   updateLibraryUI();
+  updateStatsBanner();
 }
 
 function togglePlay() {
@@ -2014,9 +2147,10 @@ function toggleFav() {
     favorites.push(track);
     showToast('❤️ Ditambah ke favorit');
   }
-  localStorage.setItem('zmz_favorites', JSON.stringify(favorites));
+  localStorage.setItem('musify_favorites', JSON.stringify(favorites));
   updateFavButton();
   updateLibraryUI();
+  updateStatsBanner();
 }
 
 function updateFavButton() {
@@ -2059,7 +2193,7 @@ function formatTime(sec) {
   return m + ':' + (s < 10 ? '0' : '') + s;
 }
 
-// ================== NOW PLAYING MODAL ==================
+// ================== NOW PLAYING ==================
 function openNowPlaying() {
   document.getElementById('now-playing').classList.add('show');
 }
@@ -2114,19 +2248,20 @@ function playFromList(type, id) {
 
 function removeFav(id) {
   favorites = favorites.filter(f => f.id !== id);
-  localStorage.setItem('zmz_favorites', JSON.stringify(favorites));
+  localStorage.setItem('musify_favorites', JSON.stringify(favorites));
   updateLibraryUI();
   updateFavButton();
+  updateStatsBanner();
   showToast('💔 Dihapus dari favorit');
 }
 
 function renderPlaylists() {
   const playlists = [
-    { name: 'Lofi Chill', emoji: '🎧', sub: 'Playlist • ZmZ', q: 'lofi hip hop' },
-    { name: 'Top Hits ID', emoji: '🔥', sub: 'Playlist • ZmZ', q: 'top hits indonesia 2026' },
-    { name: 'Dangdut Koplo', emoji: '💃', sub: 'Playlist • ZmZ', q: 'dangdut koplo' },
-    { name: 'Rock Indonesia', emoji: '🎸', sub: 'Playlist • ZmZ', q: 'rock indonesia' },
-    { name: 'EDM 2026', emoji: '⚡', sub: 'Playlist • ZmZ', q: 'edm 2026' }
+    { name: 'Lofi Chill', emoji: '🎧', sub: 'Playlist • Musify', q: 'lofi hip hop' },
+    { name: 'Top Hits ID', emoji: '🔥', sub: 'Playlist • Musify', q: 'top hits indonesia 2026' },
+    { name: 'Dangdut Koplo', emoji: '💃', sub: 'Playlist • Musify', q: 'dangdut koplo' },
+    { name: 'Rock Indonesia', emoji: '🎸', sub: 'Playlist • Musify', q: 'rock indonesia' },
+    { name: 'EDM 2026', emoji: '⚡', sub: 'Playlist • Musify', q: 'edm 2026' }
   ];
 
   document.getElementById('playlist-list').innerHTML = playlists.map(p => `
@@ -2143,39 +2278,27 @@ function renderPlaylists() {
 // ================== PREMIUM ==================
 const PLANS = [
   {
-    id: 'mini',
-    name: 'Mini',
-    price: 'Rp 9.900',
-    period: '/minggu',
+    id: 'mini', name: 'Mini', price: 'Rp 9.900', period: '/minggu',
     desc: 'Cocok buat coba-coba',
     features: ['Tanpa iklan', 'Audio 160kbps', 'Skip unlimited'],
     featured: false
   },
   {
-    id: 'individual',
-    name: 'Individual',
-    price: 'Rp 29.900',
-    period: '/bulan',
+    id: 'individual', name: 'Individual', price: 'Rp 29.900', period: '/bulan',
     desc: 'Paling worth it buat sehari-hari',
-    features: ['Tanpa iklan', 'Audio 320kbps', 'Skip unlimited', 'Download 100 lagu', 'Equalizer advanced'],
+    features: ['Tanpa iklan', 'Audio 320kbps', 'Skip unlimited', 'Download 100 lagu', 'Equalizer advanced', 'Lyrics real-time'],
     featured: true
   },
   {
-    id: 'family',
-    name: 'Family',
-    price: 'Rp 49.900',
-    period: '/bulan',
+    id: 'family', name: 'Family', price: 'Rp 49.900', period: '/bulan',
     desc: 'Sampai 6 akun',
     features: ['Semua fitur Individual', '6 akun terpisah', 'Download 500 lagu', 'Parental control'],
     featured: false
   },
   {
-    id: 'lifetime',
-    name: 'Lifetime',
-    price: 'Rp 299.900',
-    period: 'sekali bayar',
+    id: 'lifetime', name: 'Lifetime', price: 'Rp 299.900', period: 'sekali bayar',
     desc: 'Bayar sekali, pake selamanya',
-    features: ['Semua fitur Family', 'Bayar sekali', 'Update selamanya', 'Priority support'],
+    features: ['Semua fitur Family', 'Bayar sekali', 'Update selamanya', 'Priority support', 'Badge eksklusif'],
     featured: false
   }
 ];
@@ -2218,13 +2341,13 @@ function buyPlan(planId) {
       setTimeout(() => {
         user.premium = true;
         user.plan = planId;
-        localStorage.setItem('zmz_user', JSON.stringify(user));
+        localStorage.setItem('musify_user', JSON.stringify(user));
         updateUserUI();
         renderPremiumPlans();
         showModal(
           '🎉',
           'Premium Aktif!',
-          `Selamat! Lo sekarang <b>ZmZ Premium ${plan.name}</b>. Nikmati fitur tanpa batas!`,
+          `Selamat! Lo sekarang <b>Musify Premium ${plan.name}</b>. Nikmati fitur tanpa batas!`,
           'Mantap!',
           () => closeModal()
         );
@@ -2253,10 +2376,55 @@ function updateUserUI() {
 // ================== PROFILE ==================
 function updateProfileUI() {
   document.getElementById('profile-name').textContent = user.name;
+  document.getElementById('profile-username').textContent = '@' + user.username;
   document.getElementById('profile-email').textContent = user.email;
   document.getElementById('stat-fav').textContent = favorites.length;
   document.getElementById('stat-recent').textContent = recent.length;
   updateUserUI();
+}
+
+function editProfile() {
+  const newName = prompt('Nama baru:', user.name);
+  if (newName) {
+    user.name = newName;
+    const newUser = prompt('Username baru (tanpa @):', user.username);
+    if (newUser) user.username = newUser;
+    localStorage.setItem('musify_user', JSON.stringify(user));
+    updateProfileUI();
+    updateGreeting();
+    showToast('✅ Profile updated');
+  }
+}
+
+function showStats() {
+  const hours = Math.floor(totalListenTime / 3600);
+  const mins = Math.floor((totalListenTime % 3600) / 60);
+  showModal(
+    '📊',
+    'Listening Stats',
+    `<b>Total waktu dengerin:</b> ${hours}j ${mins}m<br>
+     <b>Total lagu diputar:</b> ${totalTracksPlayed}<br>
+     <b>Favorit:</b> ${favorites.length} lagu<br>
+     <b>Recent:</b> ${recent.length} lagu`,
+    'Tutup',
+    () => closeModal()
+  );
+}
+
+function exportData() {
+  const data = {
+    user, favorites, recent,
+    stats: { totalListenTime, totalTracksPlayed },
+    exported: new Date().toISOString()
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'musify-backup-' + Date.now() + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('📤 Data exported');
 }
 
 function clearData() {
@@ -2269,15 +2437,44 @@ function clearData() {
       localStorage.clear();
       favorites = [];
       recent = [];
-      user = { name: 'ZmZ User', email: 'user@zmz.music', premium: false, plan: null };
+      downloads = [];
+      user = { name: 'ZmZ User', username: 'h4xx_zmz', email: 'user@musify.h4xx', premium: false, plan: null };
+      totalListenTime = 0;
+      totalTracksPlayed = 0;
       updateLibraryUI();
       updateUserUI();
       renderPremiumPlans();
+      updateStatsBanner();
       closeModal();
       showToast('✅ Data dihapus');
     },
     true
   );
+}
+
+// ================== STATS BANNER ==================
+function updateStatsBanner() {
+  document.getElementById('sb-fav').textContent = favorites.length;
+  document.getElementById('sb-recent').textContent = recent.length;
+}
+
+// ================== EQ MODAL ==================
+function showEqModal() {
+  if (!user.premium) {
+    showModal(
+      '👑',
+      'Fitur Premium',
+      'Equalizer cuma buat user Premium. Upgrade dulu ya!',
+      'Upgrade Sekarang',
+      () => {
+        closeModal();
+        switchPage('premium');
+      },
+      true
+    );
+    return;
+  }
+  showToast('🎛️ Equalizer: Bass ' + eqSettings.bass + '% • Treble ' + eqSettings.treble + '%');
 }
 
 // ================== MUTE ==================
@@ -2332,10 +2529,6 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
-function toggleTheme() {
-  showToast('🎛️ Equalizer coming soon');
-}
-
 // ================== SEARCH INPUT ==================
 document.getElementById('search-input').addEventListener('keypress', e => {
   if (e.key === 'Enter') doSearch();
@@ -2360,4 +2553,4 @@ document.addEventListener('keydown', (e) => {
 });
 </script>
 </body>
- </html>
+                                                                                                                                                                    </html>
