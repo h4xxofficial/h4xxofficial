@@ -2,1545 +2,2362 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Musify — Spotify Style Player</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>ZmZ Music</title>
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif; -webkit-tap-highlight-color:transparent; }
-  body { background:#000; color:#fff; min-height:100vh; overflow-x:hidden; }
+  * {
+    margin: 0; padding: 0; box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+  }
 
-  /* ============ LOGIN ============ */
-  .login-screen {
-    position:fixed; inset:0; z-index:2000;
-    background:linear-gradient(180deg,#1DB954 0%,#121212 40%,#000 100%);
-    display:flex; align-items:center; justify-content:center; padding:20px;
-    transition:opacity 0.4s, visibility 0.4s;
+  :root {
+    --green: #1ed760;
+    --green-glow: rgba(30, 215, 96, 0.4);
+    --purple: #7c3aed;
+    --blue: #0ea5e9;
+    --gold: #ffd700;
+    --glass-bg: rgba(255, 255, 255, 0.07);
+    --glass-border: rgba(255, 255, 255, 0.12);
+    --glass-hover: rgba(255, 255, 255, 0.12);
+    --glass-strong: rgba(255, 255, 255, 0.15);
+    --text: #fff;
+    --text-sub: rgba(255, 255, 255, 0.6);
+    --text-dim: rgba(255, 255, 255, 0.4);
+    --blur: 40px;
+    --nav-height: 80px;
+    --player-height: 72px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
   }
-  .login-screen.hide { opacity:0; visibility:hidden; pointer-events:none; }
-  .login-card {
-    width:100%; max-width:440px; background:rgba(0,0,0,0.85);
-    backdrop-filter:blur(20px); border:1px solid rgba(255,255,255,0.1);
-    border-radius:20px; padding:40px 32px; text-align:center;
-    box-shadow:0 30px 80px rgba(0,0,0,0.8);
-  }
-  .login-logo {
-    width:64px; height:64px; background:#1DB954; border-radius:50%;
-    display:flex; align-items:center; justify-content:center;
-    font-size:32px; margin:0 auto 20px; box-shadow:0 10px 30px rgba(29,185,84,0.6);
-  }
-  .login-title { font-size:28px; font-weight:900; letter-spacing:-1px; margin-bottom:8px; }
-  .login-sub { font-size:14px; color:rgba(255,255,255,0.6); margin-bottom:32px; line-height:1.5; }
-  .login-btn {
-    width:100%; padding:14px 20px; border-radius:50px;
-    border:1px solid rgba(255,255,255,0.2); background:rgba(255,255,255,0.05);
-    color:#fff; font-size:14px; font-weight:600; cursor:pointer;
-    display:flex; align-items:center; justify-content:center;
-    gap:12px; margin-bottom:12px; transition:all 0.2s; font-family:inherit;
-  }
-  .login-btn:hover { background:rgba(255,255,255,0.12); transform:translateY(-1px); }
-  .login-btn.google { background:#fff; color:#000; border-color:#fff; }
-  .login-btn.google:hover { background:#f0f0f0; }
-  .login-btn.facebook { background:#1877F2; border-color:#1877F2; }
-  .login-btn.facebook:hover { background:#0d65d9; }
-  .login-btn.guest { background:transparent; border-color:rgba(255,255,255,0.15); font-size:13px; opacity:0.8; }
-  .login-divider { display:flex; align-items:center; gap:12px; color:rgba(255,255,255,0.4); font-size:12px; margin:20px 0; }
-  .login-divider::before, .login-divider::after { content:''; flex:1; height:1px; background:rgba(255,255,255,0.1); }
-  .login-legal { font-size:11px; color:rgba(255,255,255,0.4); margin-top:20px; line-height:1.6; }
-  .login-legal a { color:#1DB954; text-decoration:none; }
 
-  /* ============ APP ============ */
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    background: #000;
+  }
+
+  body {
+    color: var(--text);
+    position: relative;
+    overscroll-behavior: none;
+  }
+
+  /* ===== ANIMATED BACKGROUND ===== */
+  .bg-anim {
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    background: #0a0a0f;
+  }
+
+  .bg-blob {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.5;
+    z-index: -1;
+    animation: blobMove 20s ease-in-out infinite;
+  }
+
+  .bg-blob.b1 { width: 400px; height: 400px; background: var(--green); top: -100px; left: -100px; }
+  .bg-blob.b2 { width: 350px; height: 350px; background: var(--purple); bottom: -100px; right: -100px; animation-delay: -7s; }
+  .bg-blob.b3 { width: 300px; height: 300px; background: var(--blue); top: 40%; left: 50%; animation-delay: -14s; }
+
+  @keyframes blobMove {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(60px, -40px) scale(1.1); }
+    66% { transform: translate(-40px, 60px) scale(0.9); }
+  }
+
+  /* ===== APP CONTAINER ===== */
   .app {
-    display:none;
-    grid-template-columns: 240px 1fr 320px;
-    grid-template-rows: 1fr 90px;
-    grid-template-areas: "sidebar main right" "player player player";
-    height:100vh; gap:8px; padding:8px;
+    height: 100vh;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    max-width: 480px;
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden;
   }
-  .app.show { display:grid; }
 
-  /* SIDEBAR */
-  .sidebar {
-    grid-area:sidebar; background:#121212; border-radius:8px;
-    padding:16px 8px; overflow-y:auto;
-    display:flex; flex-direction:column; gap:12px;
+  /* ===== TOP BAR (GLASS) ===== */
+  .top-bar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: calc(var(--safe-top) + 12px) 20px 12px;
+    background: rgba(10, 10, 15, 0.5);
+    backdrop-filter: blur(var(--blur)) saturate(180%);
+    -webkit-backdrop-filter: blur(var(--blur)) saturate(180%);
+    border-bottom: 1px solid var(--glass-border);
   }
-  .sidebar::-webkit-scrollbar { width:6px; }
-  .sidebar::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.1); border-radius:3px; }
-  .logo-row { display:flex; align-items:center; gap:10px; padding:8px 12px 12px; }
-  .logo-icon {
-    width:36px; height:36px; background:#1DB954; border-radius:50%;
-    display:flex; align-items:center; justify-content:center;
-    font-size:18px; box-shadow:0 4px 16px rgba(29,185,84,0.5);
-  }
-  .logo-text { font-size:20px; font-weight:800; }
-  .nav-item {
-    display:flex; align-items:center; gap:14px; padding:10px 14px;
-    border-radius:6px; color:rgba(255,255,255,0.7); font-size:14px;
-    font-weight:600; cursor:pointer; transition:all 0.15s;
-  }
-  .nav-item:hover { color:#fff; background:rgba(255,255,255,0.05); }
-  .nav-item.active { color:#fff; background:rgba(255,255,255,0.1); }
-  .nav-item .ico { font-size:18px; width:22px; text-align:center; }
-  .divider { height:1px; background:rgba(255,255,255,0.08); margin:4px 8px; }
-  .pl-label {
-    font-size:11px; font-weight:700; letter-spacing:1.5px;
-    text-transform:uppercase; color:rgba(255,255,255,0.5);
-    padding:0 14px; margin-bottom:6px;
-  }
-  .pl-item {
-    display:flex; align-items:center; gap:12px; padding:8px 12px;
-    border-radius:6px; cursor:pointer;
-  }
-  .pl-item:hover { background:rgba(255,255,255,0.05); }
-  .pl-item.active { background:rgba(29,185,84,0.15); }
-  .pl-thumb {
-    width:40px; height:40px; border-radius:4px; flex-shrink:0;
-    display:flex; align-items:center; justify-content:center;
-    font-size:16px; overflow:hidden;
-  }
-  .pl-name { font-size:13px; font-weight:600; }
-  .pl-sub { font-size:11px; color:rgba(255,255,255,0.5); margin-top:2px; }
 
-  /* MAIN */
+  .top-bar .logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.4px;
+  }
+
+  .logo-mark {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--green), #14a44d);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000;
+    font-size: 16px;
+    font-weight: 900;
+    box-shadow: 0 0 20px var(--green-glow);
+    animation: logoPulse 3s ease infinite;
+  }
+
+  @keyframes logoPulse {
+    0%, 100% { box-shadow: 0 0 20px var(--green-glow); }
+    50% { box-shadow: 0 0 30px var(--green-glow), 0 0 40px var(--green-glow); }
+  }
+
+  .premium-badge {
+    font-size: 9px;
+    font-weight: 900;
+    padding: 3px 8px;
+    border-radius: 500px;
+    background: linear-gradient(135deg, var(--gold), #ffa500);
+    color: #000;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: none;
+    margin-left: 4px;
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.5);
+  }
+  .premium-badge.show { display: inline-block; }
+
+  .top-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .top-icon-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+  }
+
+  .top-icon-btn:active { transform: scale(0.9); background: var(--glass-hover); }
+
+  /* ===== SEARCH BAR ===== */
+  .search-wrap {
+    padding: 12px 20px 8px;
+    transition: 0.3s;
+  }
+
+  .search-wrap.hidden { display: none; }
+
+  .search-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    padding: 12px 16px;
+    transition: 0.25s;
+  }
+
+  .search-bar:focus-within {
+    border-color: rgba(30, 215, 96, 0.6);
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 0 4px rgba(30, 215, 96, 0.1), 0 0 24px rgba(30, 215, 96, 0.2);
+  }
+
+  .search-bar input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #fff;
+    font-size: 15px;
+  }
+
+  .search-bar input::placeholder { color: var(--text-sub); }
+  .search-bar .icon { color: var(--text-sub); font-size: 16px; }
+
+  .search-clear {
+    background: var(--glass-bg);
+    border: none;
+    color: var(--text-sub);
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+  }
+  .search-clear.show { display: flex; }
+
+  /* ===== MAIN ===== */
   .main {
-    grid-area:main; background:linear-gradient(180deg,#1a1a1a,#121212 40%,#0a0a0a);
-    border-radius:8px; overflow-y:auto;
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-bottom: calc(var(--nav-height) + var(--player-height) + 30px);
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
   }
-  .main::-webkit-scrollbar { width:8px; }
-  .main::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.1); border-radius:4px; }
-  .main-header {
-    position:sticky; top:0; z-index:10; padding:16px 28px;
-    background:linear-gradient(180deg,rgba(29,185,84,0.4),rgba(18,18,18,0.95) 80%);
-    backdrop-filter:blur(20px);
-    display:flex; align-items:center; justify-content:space-between;
-    border-bottom:1px solid rgba(255,255,255,0.05);
-  }
-  .page-title { font-size:22px; font-weight:800; letter-spacing:-0.5px; }
-  .user-chip {
-    display:flex; align-items:center; gap:8px; padding:5px 12px 5px 5px;
-    border-radius:20px; background:rgba(0,0,0,0.6); cursor:pointer;
-    font-size:13px; font-weight:600;
-  }
-  .user-chip .avatar {
-    width:28px; height:28px; border-radius:50%;
-    background:linear-gradient(135deg,#1DB954,#0d7a35);
-    display:flex; align-items:center; justify-content:center;
-    font-size:13px; font-weight:700;
-  }
-  .page { display:none; padding-bottom:24px; }
-  .page.active { display:block; }
 
-  /* HERO */
-  .hero { padding:28px 28px 20px; display:flex; align-items:flex-end; gap:24px; }
-  .hero-cover {
-    width:160px; height:160px; border-radius:8px; flex-shrink:0;
-    background:linear-gradient(135deg,#1DB954,#0d7a35);
-    box-shadow:0 15px 50px rgba(0,0,0,0.7);
-    display:flex; align-items:center; justify-content:center;
-    font-size:60px; overflow:hidden; position:relative;
+  .main::-webkit-scrollbar { display: none; }
+
+  .page {
+    display: none;
+    animation: fadeIn 0.35s ease;
   }
-  .hero-cover::after {
-    content:''; position:absolute; inset:0;
-    background:linear-gradient(45deg,transparent 30%,rgba(255,255,255,0.15) 50%,transparent 70%);
-    animation:shine 3s infinite;
+  .page.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
   }
-  @keyframes shine { 0%{transform:translateX(-100%);} 100%{transform:translateX(100%);} }
-  .hero-cover img { width:100%; height:100%; object-fit:cover; }
-  .hero-info { flex:1; min-width:0; }
-  .hero-tag { font-size:11px; font-weight:700; letter-spacing:1.5px;
-    text-transform:uppercase; color:rgba(255,255,255,0.7); }
+
+  /* ===== HERO GREETING ===== */
+  .greeting {
+    padding: 16px 20px 8px;
+  }
+
+  .greeting h1 {
+    font-size: 26px;
+    font-weight: 900;
+    letter-spacing: -0.6px;
+    line-height: 1.15;
+  }
+
+  .greeting p {
+    font-size: 13px;
+    color: var(--text-sub);
+    margin-top: 4px;
+  }
+
+  .greeting .highlight {
+    background: linear-gradient(135deg, var(--green), var(--blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ===== HERO CARDS ===== */
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 12px 20px;
+  }
+
+  .hero-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+    overflow: hidden;
+    height: 60px;
+  }
+
+  .hero-card:active {
+    background: var(--glass-hover);
+    transform: scale(0.96);
+  }
+
+  .hero-emoji {
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    background: linear-gradient(135deg, rgba(30,215,96,0.25), rgba(124,58,237,0.25));
+  }
+
   .hero-title {
-    font-size:36px; font-weight:900; letter-spacing:-1.5px;
-    line-height:1.1; margin:8px 0 10px;
-    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
-  .hero-meta { display:flex; align-items:center; gap:8px; font-size:13px; color:rgba(255,255,255,0.7); flex-wrap:wrap; }
-  .hero-meta .artist { font-weight:700; color:#fff; }
-  .hero-meta .dot { width:4px; height:4px; border-radius:50%; background:rgba(255,255,255,0.5); }
 
-  .visualizer { display:flex; align-items:flex-end; gap:3px; height:32px; margin-top:14px; }
-  .visualizer span {
-    width:4px; background:linear-gradient(180deg,#1DB954,#0d7a35);
-    border-radius:2px; height:6px;
-  }
-  .visualizer.playing span { animation:viz 0.7s infinite ease-in-out; }
-  .visualizer.playing span:nth-child(1){animation-delay:0s;}
-  .visualizer.playing span:nth-child(2){animation-delay:0.1s;}
-  .visualizer.playing span:nth-child(3){animation-delay:0.2s;}
-  .visualizer.playing span:nth-child(4){animation-delay:0.3s;}
-  .visualizer.playing span:nth-child(5){animation-delay:0.4s;}
-  .visualizer.playing span:nth-child(6){animation-delay:0.5s;}
-  .visualizer.playing span:nth-child(7){animation-delay:0.15s;}
-  .visualizer.playing span:nth-child(8){animation-delay:0.35s;}
-  .visualizer.playing span:nth-child(9){animation-delay:0.05s;}
-  .visualizer.playing span:nth-child(10){animation-delay:0.25s;}
-  @keyframes viz { 0%,100%{height:6px;} 50%{height:32px;} }
+  /* ===== SECTION ===== */
+  .section { padding: 16px 20px; }
 
-  .action-bar { padding:8px 28px 20px; display:flex; align-items:center; gap:16px; }
-  .play-big {
-    width:56px; height:56px; border-radius:50%;
-    background:#1DB954; border:none; color:#000; font-size:22px;
-    cursor:pointer; display:flex; align-items:center; justify-content:center;
-    box-shadow:0 8px 24px rgba(29,185,84,0.4); transition:transform 0.15s;
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 14px;
   }
-  .play-big:hover { transform:scale(1.08); }
-  .icon-btn {
-    background:transparent; border:none; color:rgba(255,255,255,0.7);
-    font-size:20px; cursor:pointer; padding:6px; transition:all 0.15s;
-  }
-  .icon-btn:hover { color:#fff; transform:scale(1.1); }
-  .icon-btn.on { color:#1DB954; }
 
-  .section-title { padding:20px 28px 12px; display:flex; align-items:center; justify-content:space-between; }
-  .section-title h2 { font-size:20px; font-weight:800; letter-spacing:-0.5px; }
+  .section-title {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.4px;
+  }
 
-  .track-list-header {
-    display:grid; grid-template-columns:40px 1fr 80px 70px;
-    gap:16px; padding:0 28px 12px;
-    border-bottom:1px solid rgba(255,255,255,0.08);
-    color:rgba(255,255,255,0.5); font-size:12px; font-weight:600;
-    text-transform:uppercase; letter-spacing:1.2px; margin:0 12px;
+  .section-more {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-sub);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
   }
-  .track-row {
-    display:grid; grid-template-columns:40px 1fr 80px 70px;
-    gap:16px; align-items:center; padding:8px 28px;
-    border-radius:6px; cursor:pointer; margin:0 12px;
-    transition:background 0.15s;
-  }
-  .track-row:hover { background:rgba(255,255,255,0.08); }
-  .track-row.active { background:rgba(29,185,84,0.15); }
-  .track-row.active .t-name, .track-row.active .t-num { color:#1DB954; }
-  .t-num { text-align:center; color:rgba(255,255,255,0.5); font-size:15px; }
-  .t-main { display:flex; align-items:center; gap:14px; min-width:0; }
-  .t-thumb {
-    width:44px; height:44px; border-radius:4px; flex-shrink:0;
-    background:linear-gradient(135deg,#1DB954,#0d7a35);
-    display:flex; align-items:center; justify-content:center;
-    font-size:16px; overflow:hidden;
-  }
-  .t-thumb img { width:100%; height:100%; object-fit:cover; }
-  .t-text { min-width:0; flex:1; }
-  .t-name { font-size:15px; font-weight:500; margin-bottom:3px;
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .t-artist { font-size:13px; color:rgba(255,255,255,0.6);
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .t-dur { font-size:13px; color:rgba(255,255,255,0.5); text-align:right; }
-  .t-actions { display:flex; justify-content:flex-end; gap:4px; }
-  .t-btn {
-    background:transparent; border:none; color:rgba(255,255,255,0.4);
-    cursor:pointer; font-size:14px; opacity:0;
-    width:28px; height:28px; border-radius:50%; transition:all 0.15s;
-  }
-  .track-row:hover .t-btn { opacity:1; }
-  .t-btn:hover { color:#1DB954; background:rgba(29,185,84,0.1); }
-  .t-btn.del:hover { color:#ff4757; background:rgba(255,71,87,0.1); }
-  .t-btn.liked { opacity:1; color:#1DB954; }
 
-  .eq { display:flex; gap:2px; align-items:flex-end; height:14px; justify-content:center; }
-  .eq span { width:3px; background:#1DB954; border-radius:2px; animation:eq 0.8s infinite; }
-  .eq span:nth-child(1){ animation-delay:0s; }
-  .eq span:nth-child(2){ animation-delay:0.2s; }
-  .eq span:nth-child(3){ animation-delay:0.4s; }
-  @keyframes eq { 0%,100%{height:4px;} 50%{height:14px;} }
-
+  /* ===== CARD GRID ===== */
   .card-grid {
-    display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr));
-    gap:16px; padding:0 28px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
   }
+
   .card {
-    background:rgba(255,255,255,0.04); border-radius:8px;
-    padding:16px; cursor:pointer; transition:all 0.2s;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 10px;
+    cursor: pointer;
+    transition: 0.25s;
+    position: relative;
+    overflow: hidden;
   }
-  .card:hover { background:rgba(255,255,255,0.1); transform:translateY(-4px); }
+
+  .card:active {
+    background: var(--glass-hover);
+    transform: scale(0.97);
+    border-color: rgba(255,255,255,0.25);
+  }
+
   .card-img {
-    width:100%; aspect-ratio:1; border-radius:6px;
-    display:flex; align-items:center; justify-content:center;
-    font-size:44px; margin-bottom:12px; overflow:hidden;
-    box-shadow:0 8px 24px rgba(0,0,0,0.5);
-  }
-  .card-title { font-size:14px; font-weight:700; margin-bottom:4px;
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .card-sub { font-size:12px; color:rgba(255,255,255,0.5);
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-
-  .chip-row { display:flex; gap:8px; padding:0 28px 16px; flex-wrap:wrap; }
-  .chip {
-    padding:8px 16px; border-radius:20px;
-    background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.1);
-    color:#fff; font-size:13px; font-weight:600;
-    cursor:pointer; transition:all 0.15s; font-family:inherit;
-  }
-  .chip:hover { background:rgba(255,255,255,0.15); }
-  .chip.active { background:#1DB954; color:#000; border-color:#1DB954; }
-
-  /* RIGHT PANEL */
-  .right-panel {
-    grid-area:right; background:#121212; border-radius:8px;
-    padding:20px; overflow-y:auto;
-    display:flex; flex-direction:column; gap:18px;
-  }
-  .right-panel::-webkit-scrollbar { width:6px; }
-  .right-panel::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.1); border-radius:3px; }
-  .search-box { display:flex; gap:8px; }
-  .search-box input {
-    flex:1; padding:10px 14px; border-radius:20px;
-    border:1px solid rgba(255,255,255,0.1);
-    background:rgba(255,255,255,0.06); color:#fff;
-    font-size:13px; outline:none;
-  }
-  .search-box input:focus { border-color:#1DB954; }
-  .search-box input::placeholder { color:rgba(255,255,255,0.4); }
-  .search-box button {
-    width:40px; height:40px; border-radius:50%; border:none;
-    background:#1DB954; color:#000; font-size:15px; font-weight:800;
-    cursor:pointer; flex-shrink:0;
-  }
-  .search-box button:hover { transform:scale(1.08); }
-  .search-box button:disabled { opacity:0.5; }
-  .panel-title { font-size:14px; font-weight:700; margin-bottom:10px; }
-  .quick-picks { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-  .pick {
-    padding:12px 10px; border-radius:8px;
-    background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.08);
-    color:#fff; font-size:11px; font-weight:600;
-    cursor:pointer; text-align:left; font-family:inherit;
-    transition:all 0.15s;
-  }
-  .pick:hover { background:rgba(255,255,255,0.12); transform:translateY(-2px); }
-  .pick span { display:block; font-size:18px; margin-bottom:4px; }
-  .search-results { display:flex; flex-direction:column; gap:6px; max-height:400px; overflow-y:auto; }
-  .sr-item {
-    display:flex; align-items:center; gap:10px; padding:8px;
-    border-radius:6px; background:rgba(255,255,255,0.04); cursor:pointer;
-  }
-  .sr-item:hover { background:rgba(255,255,255,0.1); }
-  .sr-thumb { width:60px; height:45px; border-radius:4px; flex-shrink:0; background:#333; overflow:hidden; }
-  .sr-thumb img { width:100%; height:100%; object-fit:cover; }
-  .sr-info { flex:1; min-width:0; }
-  .sr-title { font-size:12px; font-weight:600;
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .sr-channel { font-size:11px; color:rgba(255,255,255,0.5);
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px; }
-  .sr-add {
-    background:#1DB954; border:none; color:#000;
-    width:26px; height:26px; border-radius:50%;
-    cursor:pointer; font-size:14px; font-weight:800; flex-shrink:0;
-  }
-  .info-box {
-    padding:12px; background:rgba(29,185,84,0.1);
-    border:1px solid rgba(29,185,84,0.3); border-radius:8px;
-    font-size:12px; color:rgba(255,255,255,0.8); line-height:1.5;
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 10px;
+    background: linear-gradient(135deg, rgba(30,215,96,0.3), rgba(124,58,237,0.3));
+    position: relative;
   }
 
-  /* PROFILE */
-  .profile-header { display:flex; align-items:center; gap:24px; padding:32px 28px; }
+  .card-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .card-play-btn {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--green);
+    border: none;
+    color: #000;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 16px rgba(30, 215, 96, 0.5);
+    cursor: pointer;
+    transition: 0.2s;
+  }
+
+  .card-play-btn:active { transform: scale(0.85); }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .card-artist {
+    font-size: 11px;
+    color: var(--text-sub);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ===== HORIZONTAL SCROLL ===== */
+  .h-scroll {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding: 0 20px 8px;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+  .h-scroll::-webkit-scrollbar { display: none; }
+
+  .h-card {
+    flex-shrink: 0;
+    width: 140px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    padding: 10px;
+    cursor: pointer;
+    transition: 0.2s;
+    scroll-snap-align: start;
+  }
+
+  .h-card:active { transform: scale(0.95); }
+
+  .h-card .h-img {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, rgba(30,215,96,0.3), rgba(124,58,237,0.3));
+  }
+
+  .h-card .h-img img { width: 100%; height: 100%; object-fit: cover; }
+
+  .h-card .h-title {
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .h-card .h-sub {
+    font-size: 10px;
+    color: var(--text-sub);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ===== LIBRARY ===== */
+  .lib-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: 0.2s;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    margin-bottom: 8px;
+  }
+
+  .lib-item:active { background: var(--glass-hover); transform: scale(0.98); }
+
+  .lib-thumb {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    background: linear-gradient(135deg, rgba(30,215,96,0.3), rgba(124,58,237,0.3));
+    overflow: hidden;
+  }
+
+  .lib-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+  .lib-info { flex: 1; overflow: hidden; }
+
+  .lib-name {
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .lib-sub {
+    font-size: 12px;
+    color: var(--text-sub);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .lib-action {
+    background: transparent;
+    border: none;
+    color: var(--text-sub);
+    font-size: 18px;
+    cursor: pointer;
+    padding: 8px;
+    transition: 0.2s;
+  }
+
+  .lib-action:active { transform: scale(0.9); color: #fff; }
+
+  /* ===== PREMIUM PAGE ===== */
+  .premium-hero {
+    margin: 20px;
+    padding: 36px 24px 32px;
+    border-radius: 28px;
+    background: linear-gradient(135deg, rgba(255,215,0,0.18), rgba(255,165,0,0.1), rgba(124,58,237,0.15));
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border: 1px solid rgba(255,215,0,0.35);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .premium-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 0%, rgba(255,215,0,0.35), transparent 70%);
+    pointer-events: none;
+  }
+
+  .premium-crown {
+    font-size: 56px;
+    margin-bottom: 16px;
+    filter: drop-shadow(0 0 24px rgba(255,215,0,0.7));
+    animation: crownGlow 2s ease infinite;
+    position: relative;
+    z-index: 1;
+  }
+
+  @keyframes crownGlow {
+    0%, 100% { transform: scale(1) rotate(-3deg); }
+    50% { transform: scale(1.1) rotate(3deg); }
+  }
+
+  .premium-title {
+    font-size: 28px;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--gold), #ffa500);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .premium-sub {
+    font-size: 14px;
+    color: var(--text-sub);
+    margin-bottom: 4px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .premium-plans {
+    display: grid;
+    gap: 14px;
+    margin: 0 20px;
+  }
+
+  .plan {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 20px;
+    cursor: pointer;
+    transition: 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .plan:active { transform: scale(0.98); }
+
+  .plan.featured {
+    border-color: rgba(255,215,0,0.5);
+    background: linear-gradient(135deg, rgba(255,215,0,0.12), rgba(255,165,0,0.05));
+    box-shadow: 0 0 30px rgba(255,215,0,0.15);
+  }
+
+  .plan.featured::before {
+    content: '⭐ PALING POPULER';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, var(--gold), #ffa500);
+    color: #000;
+    font-size: 10px;
+    font-weight: 900;
+    padding: 4px;
+    text-align: center;
+    letter-spacing: 1px;
+  }
+
+  .plan.featured { padding-top: 32px; }
+
+  .plan-name {
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+
+  .plan-price {
+    font-size: 26px;
+    font-weight: 900;
+    color: var(--green);
+    margin-bottom: 4px;
+    letter-spacing: -0.5px;
+  }
+
+  .plan-price span {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-sub);
+  }
+
+  .plan-desc {
+    font-size: 12px;
+    color: var(--text-sub);
+  }
+
+  .plan-features {
+    list-style: none;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--glass-border);
+  }
+
+  .plan-features li {
+    font-size: 12px;
+    padding: 5px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text);
+  }
+
+  .plan-features li::before {
+    content: '✓';
+    color: var(--green);
+    font-weight: 900;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .plan.owned {
+    border-color: var(--green);
+    background: linear-gradient(135deg, rgba(30,215,96,0.15), rgba(30,215,96,0.05));
+  }
+
+  .plan.owned::after {
+    content: '✓ AKTIF';
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: var(--green);
+    color: #000;
+    font-size: 10px;
+    font-weight: 900;
+    padding: 3px 8px;
+    border-radius: 500px;
+  }
+
+  .plan-buy-btn {
+    margin-top: 14px;
+    width: 100%;
+    padding: 14px;
+    border-radius: 14px;
+    border: none;
+    background: linear-gradient(135deg, var(--gold), #ffa500);
+    color: #000;
+    font-size: 14px;
+    font-weight: 900;
+    cursor: pointer;
+    transition: 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 16px rgba(255, 215, 0, 0.3);
+  }
+
+  .plan-buy-btn:active { transform: scale(0.97); filter: brightness(1.1); }
+
+  .plan-buy-btn.owned-btn {
+    background: var(--glass-bg);
+    color: var(--green);
+    border: 1px solid var(--green);
+    cursor: default;
+    box-shadow: none;
+  }
+
+  /* ===== PREMIUM FEATURES ===== */
+  .premium-features {
+    margin: 20px;
+    padding: 20px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+  }
+
+  .premium-features h3 {
+    font-size: 16px;
+    font-weight: 800;
+    margin-bottom: 14px;
+  }
+
+  .pf-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--glass-border);
+  }
+
+  .pf-item:last-child { border-bottom: none; }
+
+  .pf-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,165,0,0.1));
+    flex-shrink: 0;
+  }
+
+  .pf-text { flex: 1; }
+  .pf-text .t { font-size: 13px; font-weight: 600; }
+  .pf-text .s { font-size: 11px; color: var(--text-sub); }
+
+  /* ===== PROFILE PAGE ===== */
+  .profile-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 20px 20px;
+    text-align: center;
+  }
+
   .profile-avatar {
-    width:140px; height:140px; border-radius:50%;
-    display:flex; align-items:center; justify-content:center;
-    font-size:64px; overflow:hidden; box-shadow:0 15px 50px rgba(0,0,0,0.6);
-    flex-shrink:0;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--green), var(--purple));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 42px;
+    font-weight: 900;
+    color: #000;
+    margin-bottom: 16px;
+    border: 4px solid rgba(255,255,255,0.1);
+    box-shadow: 0 8px 32px var(--green-glow);
+    position: relative;
+    cursor: pointer;
   }
-  .profile-info { flex:1; }
-  .profile-type { font-size:12px; font-weight:600; letter-spacing:1.5px;
-    text-transform:uppercase; color:rgba(255,255,255,0.6); }
-  .profile-name { font-size:48px; font-weight:900; letter-spacing:-2px; margin:8px 0 16px; }
-  .profile-stats { display:flex; gap:20px; font-size:14px; color:rgba(255,255,255,0.7); }
-  .profile-stats b { color:#fff; }
-  .profile-menu { display:flex; flex-direction:column; gap:8px; padding:0 28px; }
+
+  .profile-avatar::after {
+    content: '📷';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 32px;
+    height: 32px;
+    background: var(--glass-strong);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    border: 2px solid rgba(0,0,0,0.5);
+  }
+
+  .profile-name {
+    font-size: 24px;
+    font-weight: 900;
+    margin-bottom: 4px;
+    letter-spacing: -0.4px;
+  }
+
+  .profile-sub {
+    font-size: 13px;
+    color: var(--text-sub);
+    margin-bottom: 8px;
+  }
+
+  .profile-plan-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 500px;
+    background: linear-gradient(135deg, var(--gold), #ffa500);
+    color: #000;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    box-shadow: 0 0 20px rgba(255,215,0,0.4);
+  }
+
+  .profile-plan-badge.free {
+    background: var(--glass-bg);
+    color: var(--text-sub);
+    border: 1px solid var(--glass-border);
+    box-shadow: none;
+  }
+
+  .profile-stats {
+    display: flex;
+    gap: 32px;
+    margin-top: 12px;
+  }
+
+  .stat { text-align: center; }
+
+  .stat-num {
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--green);
+    letter-spacing: -0.4px;
+  }
+
+  .stat-label {
+    font-size: 10px;
+    color: var(--text-sub);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+  }
+
+  .menu-list { padding: 20px; }
+
   .menu-item {
-    display:flex; align-items:center; gap:16px; padding:16px 20px;
-    border-radius:10px; background:rgba(255,255,255,0.04);
-    border:1px solid rgba(255,255,255,0.06);
-    cursor:pointer; transition:all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: 0.2s;
   }
-  .menu-item:hover { background:rgba(255,255,255,0.08); }
+
+  .menu-item:active { background: var(--glass-hover); transform: scale(0.98); }
+
   .menu-icon {
-    width:40px; height:40px; border-radius:50%;
-    background:rgba(29,185,84,0.15);
-    display:flex; align-items:center; justify-content:center;
-    font-size:18px; flex-shrink:0;
-  }
-  .menu-text { flex:1; }
-  .menu-title { font-size:14px; font-weight:700; margin-bottom:2px; }
-  .menu-sub { font-size:12px; color:rgba(255,255,255,0.5); }
-  .menu-arrow { color:rgba(255,255,255,0.3); font-size:20px; }
-
-  /* COLLECTION */
-  .collection-grid {
-    display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
-    gap:16px; padding:0 28px;
-  }
-  .collection-card {
-    background:rgba(255,255,255,0.04); border-radius:8px;
-    padding:14px; cursor:pointer; transition:all 0.2s;
-  }
-  .collection-card:hover { background:rgba(255,255,255,0.1); }
-  .collection-card .cc-img {
-    width:100%; aspect-ratio:1; border-radius:6px;
-    display:flex; align-items:center; justify-content:center;
-    font-size:40px; margin-bottom:10px; overflow:hidden;
-  }
-  .collection-card .cc-img img { width:100%; height:100%; object-fit:cover; }
-  .collection-card .cc-title { font-size:14px; font-weight:700; margin-bottom:2px;
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .collection-card .cc-sub { font-size:12px; color:rgba(255,255,255,0.5);
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-
-  /* PLAYER */
-  .player {
-    grid-area:player; background:#181818; border-radius:8px;
-    padding:10px 20px; display:grid; grid-template-columns:1fr 2fr 1fr;
-    align-items:center; gap:20px;
-  }
-  .np-left { display:flex; align-items:center; gap:14px; min-width:0; }
-  .np-cover {
-    width:56px; height:56px; border-radius:6px; flex-shrink:0;
-    background:linear-gradient(135deg,#1DB954,#0d7a35);
-    display:flex; align-items:center; justify-content:center;
-    font-size:22px; overflow:hidden;
-  }
-  .np-cover img { width:100%; height:100%; object-fit:cover; }
-  .np-info { min-width:0; flex:1; }
-  .np-title { font-size:14px; font-weight:600;
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .np-artist { font-size:12px; color:rgba(255,255,255,0.6);
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px; }
-  .np-like {
-    background:transparent; border:none; color:rgba(255,255,255,0.5);
-    font-size:18px; cursor:pointer; padding:4px;
-  }
-  .np-like.liked { color:#1DB954; }
-  .np-center { display:flex; flex-direction:column; align-items:center; gap:8px; }
-  .np-controls { display:flex; align-items:center; gap:16px; }
-  .np-btn {
-    background:transparent; border:none; color:rgba(255,255,255,0.7);
-    font-size:18px; cursor:pointer; padding:4px; transition:all 0.15s;
-  }
-  .np-btn:hover { color:#fff; transform:scale(1.1); }
-  .np-btn.on { color:#1DB954; }
-  .np-btn.play {
-    width:40px; height:40px; border-radius:50%;
-    background:#fff; color:#000; font-size:16px;
-  }
-  .np-progress { display:flex; align-items:center; gap:10px; width:100%; }
-  .np-time { font-size:11px; color:rgba(255,255,255,0.5); min-width:38px; text-align:center; }
-  .bar-wrap { flex:1; height:4px; background:rgba(255,255,255,0.15);
-    border-radius:4px; cursor:pointer; overflow:hidden; }
-  .bar-fill { height:100%; width:0%; background:#fff; border-radius:4px; }
-  .bar-wrap:hover .bar-fill { background:#1DB954; }
-  .np-right { display:flex; align-items:center; justify-content:flex-end; gap:12px; }
-  .vol-wrap { width:100px; height:4px; background:rgba(255,255,255,0.15);
-    border-radius:4px; cursor:pointer; overflow:hidden; }
-  .vol-fill { height:100%; width:70%; background:#fff; border-radius:4px; }
-
-  /* YouTube player hidden (audio only) */
-  #ytplayer {
-    position:fixed;
-    width:200px; height:200px;
-    opacity:0.01;
-    pointer-events:none;
-    bottom:-210px; left:-210px;
-    z-index:-1;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    background: linear-gradient(135deg, rgba(30,215,96,0.2), rgba(124,58,237,0.2));
+    flex-shrink: 0;
   }
 
+  .menu-text { flex: 1; }
+  .menu-text .title { font-size: 14px; font-weight: 600; }
+  .menu-text .sub { font-size: 11px; color: var(--text-sub); }
+
+  .menu-arrow { color: var(--text-dim); font-size: 18px; }
+
+  /* ===== PLAYER BAR ===== */
+  .player-bar {
+    position: fixed;
+    bottom: calc(var(--nav-height) + 8px);
+    left: 50%;
+    transform: translateX(-50%) translateY(0);
+    width: calc(100% - 24px);
+    max-width: 456px;
+    background: rgba(20, 20, 28, 0.75);
+    backdrop-filter: blur(var(--blur)) saturate(180%);
+    -webkit-backdrop-filter: blur(var(--blur)) saturate(180%);
+    border: 1px solid var(--glass-border);
+    border-radius: 18px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 90;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+    transition: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    overflow: hidden;
+  }
+
+  .player-bar.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-50%) translateY(120%);
+  }
+
+  .player-progress {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: rgba(255,255,255,0.1);
+  }
+
+  .player-progress-fill {
+    height: 100%;
+    background: var(--green);
+    width: 0%;
+    transition: width 0.3s linear;
+    box-shadow: 0 0 8px var(--green);
+  }
+
+  .p-img {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: linear-gradient(135deg, rgba(30,215,96,0.3), rgba(124,58,237,0.3));
+  }
+
+  .p-img img { width: 100%; height: 100%; object-fit: cover; }
+
+  .p-info { flex: 1; overflow: hidden; }
+
+  .p-title {
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .p-artist {
+    font-size: 11px;
+    color: var(--text-sub);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .p-controls { display: flex; gap: 2px; align-items: center; }
+
+  .p-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+  }
+
+  .p-btn:active { transform: scale(0.85); }
+
+  .p-btn.play-main {
+    background: #fff;
+    color: #000;
+    width: 42px;
+    height: 42px;
+    font-size: 15px;
+    box-shadow: 0 4px 12px rgba(255,255,255,0.2);
+  }
+
+  /* ===== BOTTOM NAV ===== */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    height: calc(var(--nav-height) + var(--safe-bottom));
+    padding-bottom: var(--safe-bottom);
+    background: rgba(10, 10, 15, 0.6);
+    backdrop-filter: blur(var(--blur)) saturate(180%);
+    -webkit-backdrop-filter: blur(var(--blur)) saturate(180%);
+    border-top: 1px solid var(--glass-border);
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    align-items: center;
+    z-index: 100;
+  }
+
+  .nav-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 4px;
+    background: transparent;
+    border: none;
+    color: var(--text-sub);
+    cursor: pointer;
+    transition: 0.25s;
+    position: relative;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+
+  .nav-btn .nav-ico {
+    font-size: 22px;
+    line-height: 1;
+    transition: 0.25s;
+  }
+
+  .nav-btn.active { color: var(--green); }
+
+  .nav-btn.active .nav-ico {
+    transform: scale(1.18) translateY(-2px);
+    filter: drop-shadow(0 0 10px var(--green-glow));
+  }
+
+  .nav-btn.active::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 32px;
+    height: 3px;
+    background: var(--green);
+    border-radius: 0 0 4px 4px;
+    box-shadow: 0 0 12px var(--green);
+  }
+
+  .nav-btn.premium {
+    color: var(--gold);
+  }
+
+  .nav-btn.premium.active { color: var(--gold); }
+  .nav-btn.premium.active::before { background: var(--gold); box-shadow: 0 0 12px var(--gold); }
+
+  /* ===== MODAL ===== */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeIn 0.2s ease;
+  }
+
+  .modal-overlay.show { display: flex; }
+
+  .modal {
+    background: rgba(25, 25, 32, 0.95);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    padding: 28px 24px;
+    max-width: 360px;
+    width: 100%;
+    text-align: center;
+    animation: modalPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+  }
+
+  @keyframes modalPop {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .modal-icon { font-size: 56px; margin-bottom: 12px; }
+
+  .modal-title {
+    font-size: 22px;
+    font-weight: 900;
+    margin-bottom: 8px;
+    letter-spacing: -0.4px;
+  }
+
+  .modal-desc {
+    font-size: 14px;
+    color: var(--text-sub);
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  .modal-btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 14px;
+    border: none;
+    background: linear-gradient(135deg, var(--green), #14a44d);
+    color: #000;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: 0.2s;
+    margin-bottom: 8px;
+  }
+
+  .modal-btn:active { transform: scale(0.97); }
+
+  .modal-btn.secondary {
+    background: var(--glass-bg);
+    color: #fff;
+    border: 1px solid var(--glass-border);
+  }
+
+  /* ===== TOAST ===== */
   .toast {
-    position:fixed; bottom:110px; left:50%; transform:translateX(-50%) translateY(20px);
-    background:rgba(29,185,84,0.95); color:#000; padding:10px 20px;
-    border-radius:24px; font-size:13px; font-weight:700;
-    opacity:0; pointer-events:none; transition:all 0.3s; z-index:2500;
+    position: fixed;
+    bottom: calc(var(--nav-height) + var(--player-height) + 20px);
+    left: 50%;
+    transform: translateX(-50%) translateY(120px);
+    background: rgba(30, 30, 40, 0.95);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    padding: 12px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    z-index: 300;
+    transition: 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    opacity: 0;
+    pointer-events: none;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.5);
+    max-width: 90%;
   }
-  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
-  .toast.error { background:rgba(255,71,87,0.95); color:#fff; }
 
-  .spinner {
-    display:inline-block; width:14px; height:14px;
-    border:2px solid rgba(0,0,0,0.2); border-top-color:#000;
-    border-radius:50%; animation:spin 0.6s linear infinite;
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
   }
-  @keyframes spin { to { transform:rotate(360deg); } }
 
-  @media (max-width:1100px) {
-    .app { grid-template-columns:200px 1fr; grid-template-areas:"sidebar main" "player player"; }
-    .right-panel { display:none; }
+  /* ===== SKELETON ===== */
+  .loading {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-sub);
+    font-size: 13px;
   }
-  @media (max-width:800px) {
-    .app { grid-template-columns:1fr; grid-template-areas:"main" "player"; grid-template-rows:1fr auto; }
-    .sidebar { display:none; }
-    .hero { flex-direction:column; align-items:flex-start; padding:16px 14px; }
-    .hero-title { font-size:22px; }
-    .profile-header { flex-direction:column; text-align:center; }
-    .profile-name { font-size:32px; }
-    .track-list-header, .track-row { grid-template-columns:32px 1fr 60px; padding-left:14px; padding-right:14px; }
-    .t-dur, .t-actions { display:none; }
-    .player { grid-template-columns:1fr; gap:6px; }
-    .np-left, .np-right { display:none; }
-    .card-grid, .collection-grid, .chip-row, .section-title, .profile-menu { padding-left:14px; padding-right:14px; }
+
+  .skeleton {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .skeleton-card {
+    background: var(--glass-bg);
+    border-radius: 16px;
+    padding: 10px;
+  }
+
+  .skeleton-img {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 12px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    margin-bottom: 10px;
+  }
+
+  .skeleton-line {
+    height: 10px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    margin-bottom: 6px;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* ===== EMPTY STATE ===== */
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-sub);
+  }
+
+  .empty-state .ico { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
+  .empty-state .t { font-size: 14px; font-weight: 600; margin-bottom: 4px; color: var(--text); }
+  .empty-state .s { font-size: 12px; }
+
+  /* ===== EQUALIZER ANIMATION ===== */
+  .eq {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 14px;
+  }
+
+  .eq span {
+    width: 3px;
+    background: var(--green);
+    border-radius: 2px;
+    animation: eqAnim 0.8s ease infinite;
+  }
+
+  .eq span:nth-child(1) { animation-delay: 0s; }
+  .eq span:nth-child(2) { animation-delay: 0.15s; }
+  .eq span:nth-child(3) { animation-delay: 0.3s; }
+  .eq span:nth-child(4) { animation-delay: 0.45s; }
+
+  @keyframes eqAnim {
+    0%, 100% { height: 4px; }
+    50% { height: 14px; }
+  }
+
+  #yt-player { position: fixed; left: -9999px; width: 1px; height: 1px; }
+
+  /* ===== NOW PLAYING MODAL ===== */
+  .now-playing-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    z-index: 150;
+    display: none;
+    flex-direction: column;
+    padding: calc(var(--safe-top) + 20px) 24px calc(var(--safe-bottom) + 20px);
+    animation: fadeIn 0.3s ease;
+  }
+
+  .now-playing-modal.show { display: flex; }
+
+  .np-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .np-close {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+  }
+
+  .np-label {
+    font-size: 11px;
+    color: var(--text-sub);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-weight: 700;
+  }
+
+  .np-art {
+    width: 100%;
+    max-width: 340px;
+    aspect-ratio: 1;
+    margin: 0 auto 32px;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+    background: linear-gradient(135deg, rgba(30,215,96,0.4), rgba(124,58,237,0.4));
+  }
+
+  .np-art img { width: 100%; height: 100%; object-fit: cover; }
+
+  .np-title {
+    font-size: 22px;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .np-artist {
+    font-size: 14px;
+    color: var(--text-sub);
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  .np-progress {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 11px;
+    color: var(--text-sub);
+    margin-bottom: 24px;
+  }
+
+  .np-track {
+    flex: 1;
+    height: 4px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 2px;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .np-fill {
+    height: 100%;
+    background: #fff;
+    border-radius: 2px;
+    width: 0%;
+    transition: width 0.2s linear;
+  }
+
+  .np-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+
+  .np-ctrl {
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+  }
+
+  .np-ctrl:active { transform: scale(0.9); }
+  .np-ctrl.active { color: var(--green); }
+
+  .np-play {
+    width: 64px;
+    height: 64px;
+    background: #fff;
+    color: #000;
+    font-size: 24px;
+    box-shadow: 0 8px 24px rgba(255,255,255,0.3);
+  }
+
+  .np-extra {
+    display: flex;
+    justify-content: space-around;
+  }
+
+  .np-extra .np-ctrl { font-size: 18px; }
+
+  /* ===== RESPONSIVE ===== */
+  @media (min-width: 481px) {
+    .app { border-left: 1px solid var(--glass-border); border-right: 1px solid var(--glass-border); }
   }
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
-<div class="login-screen" id="loginScreen">
-  <div class="login-card">
-    <div class="login-logo">🎵</div>
-    <div class="login-title">Musify</div>
-    <div class="login-sub">Masuk untuk mulai mendengarkan<br>jutaan lagu tanpa batas</div>
-
-    <button class="login-btn google" id="loginGoogle">
-      <svg width="20" height="20" viewBox="0 0 48 48">
-        <path fill="#FFC107" d="M43.6 20.5H42V20.5H24v7h11.3c-1.6 4.6-6 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l4.9-4.9C33 6.8 28.7 5 24 5 12.9 5 4 13.9 4 25s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.6-.4-3.5z"/>
-        <path fill="#FF3D00" d="M6.3 15.4l5.7 4.2C13.7 15.2 18.5 12 24 12c3.1 0 5.8 1.2 7.9 3.1l4.9-4.9C33 6.8 28.7 5 24 5 16.3 5 9.7 9.4 6.3 15.4z"/>
-        <path fill="#4CAF50" d="M24 45c4.6 0 8.8-1.8 11.9-4.6l-5.5-4.6c-1.8 1.4-4 2.2-6.4 2.2-5.2 0-9.6-3.3-11.3-7.9l-5.7 4.4C9.6 40.6 16.2 45 24 45z"/>
-        <path fill="#1976D2" d="M43.6 20.5H42V20.5H24v7h11.3c-.8 2.2-2.2 4.1-4 5.4l5.5 4.6C40.9 34.9 44 30.4 44 25c0-1.3-.1-2.6-.4-3.5z"/>
-      </svg>
-      Lanjutkan dengan Google
-    </button>
-
-    <button class="login-btn facebook" id="loginFacebook">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff">
-        <path d="M24 12.07C24 5.4 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.05V9.41c0-3.02 1.79-4.69 4.53-4.69 1.31 0 2.68.24 2.68.24v2.97h-1.51c-1.49 0-1.95.93-1.95 1.89v2.25h3.32l-.53 3.49h-2.79V24C19.61 23.1 24 18.1 24 12.07z"/>
-      </svg>
-      Lanjutkan dengan Facebook
-    </button>
-
-    <div class="login-divider">atau</div>
-
-    <button class="login-btn guest" id="loginGuest">👤 Lanjutkan sebagai Tamu</button>
-
-    <div class="login-legal">
-      Dengan melanjutkan, kamu menyetujui<br>
-      <a href="#">Syarat & Ketentuan</a> dan <a href="#">Kebijakan Privasi</a> Musify.
-    </div>
-  </div>
+<div class="bg-anim">
+  <div class="bg-blob b1"></div>
+  <div class="bg-blob b2"></div>
+  <div class="bg-blob b3"></div>
 </div>
 
-<!-- APP -->
-<div class="app" id="app">
+<div class="app">
 
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <div class="logo-row">
-      <div class="logo-icon">🎵</div>
-      <div class="logo-text">Musify</div>
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div class="logo">
+      <div class="logo-mark">♪</div>
+      <span>ZmZ</span>
+      <span class="premium-badge" id="premium-badge-top">👑 PRO</span>
     </div>
-    <div>
-      <div class="nav-item active" data-page="home"><span class="ico">🏠</span>Beranda</div>
-      <div class="nav-item" data-page="search"><span class="ico">🔍</span>Cari</div>
-      <div class="nav-item" data-page="collection"><span class="ico">📚</span>Koleksi Kamu</div>
-      <div class="nav-item" data-page="profile"><span class="ico">👤</span>Profile</div>
+    <div class="top-actions">
+      <button class="top-icon-btn" onclick="toggleTheme()" id="theme-btn" title="Toggle EQ">🎛️</button>
+      <div class="user-mini top-icon-btn" onclick="switchPage('profile')" style="background: linear-gradient(135deg, var(--green), var(--purple)); color: #000; font-weight: 900;">Z</div>
     </div>
-    <div class="divider"></div>
-    <div>
-      <div class="pl-label">Playlist</div>
-      <div class="pl-item active" data-playlist="indo"><div class="pl-thumb" style="background:linear-gradient(135deg,#e91e63,#c2185b);">🇮🇩</div><div><div class="pl-name">Indo Populer</div><div class="pl-sub">Top hits Indonesia</div></div></div>
-      <div class="pl-item" data-playlist="barat"><div class="pl-thumb" style="background:linear-gradient(135deg,#3f51b5,#1a237e);">🌍</div><div><div class="pl-name">Barat Hits</div><div class="pl-sub">Global top songs</div></div></div>
-      <div class="pl-item" data-playlist="chill"><div class="pl-thumb" style="background:linear-gradient(135deg,#00bcd4,#0097a7);">🌙</div><div><div class="pl-name">Chill Vibes</div><div class="pl-sub">Santai & nyaman</div></div></div>
-      <div class="pl-item" data-playlist="lofi"><div class="pl-thumb" style="background:linear-gradient(135deg,#9c27b0,#6a1b9a);">☕</div><div><div class="pl-name">Lofi Beats</div><div class="pl-sub">Fokus & belajar</div></div></div>
+  </div>
+
+  <!-- SEARCH BAR -->
+  <div class="search-wrap" id="search-wrap">
+    <div class="search-bar">
+      <span class="icon">🔍</span>
+      <input type="text" id="search-input" placeholder="Cari lagu, artis, album...">
+      <button class="search-clear" id="search-clear" onclick="clearSearch()">✕</button>
     </div>
-    <div class="divider"></div>
-    <div>
-      <div class="pl-label">Favorit Kamu</div>
-      <div id="favList"></div>
-    </div>
-  </aside>
+  </div>
 
   <!-- MAIN -->
-  <main class="main">
-    <div class="main-header">
-      <div class="page-title" id="pageTitle">Beranda</div>
-      <div class="user-chip" id="userChip">
-        <div class="avatar" id="userAvatar">U</div>
-        <span id="userName">User</span>
-      </div>
-    </div>
+  <div class="main" id="main-scroll">
 
     <!-- HOME -->
     <div class="page active" id="page-home">
-      <section class="hero">
-        <div class="hero-cover" id="heroCover">🎵</div>
-        <div class="hero-info">
-          <div class="hero-tag">Sedang Diputar</div>
-          <div class="hero-title" id="heroTitle">Memuat...</div>
-          <div class="hero-meta">
-            <span class="artist" id="heroArtist">—</span>
-            <span class="dot"></span>
-            <span id="heroCount">0 lagu</span>
-          </div>
-          <div class="visualizer" id="visualizer">
-            <span></span><span></span><span></span><span></span><span></span>
-            <span></span><span></span><span></span><span></span><span></span>
+      <div class="greeting">
+        <h1>Hai, <span class="highlight" id="greeting-name">ZmZ</span> 👋</h1>
+        <p id="greeting-sub">Mau dengerin apa hari ini?</p>
+      </div>
+
+      <div class="hero-grid" id="hero-grid"></div>
+
+      <div class="section">
+        <div class="section-header">
+          <h2 class="section-title">🔥 Trending Indonesia</h2>
+          <span class="section-more" onclick="loadTrending()">Refresh</span>
+        </div>
+        <div class="card-grid" id="home-card-grid">
+          <div class="skeleton">
+            <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-line"></div><div class="skeleton-line" style="width:60%;"></div></div>
+            <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-line"></div><div class="skeleton-line" style="width:60%;"></div></div>
+            <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-line"></div><div class="skeleton-line" style="width:60%;"></div></div>
+            <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-line"></div><div class="skeleton-line" style="width:60%;"></div></div>
           </div>
         </div>
-      </section>
-
-      <div class="action-bar">
-        <button class="play-big" id="bigPlay">▶</button>
-        <button class="icon-btn" id="shuffleBig">🔀</button>
-        <button class="icon-btn on" id="repeatBig">🔁</button>
       </div>
-
-      <div class="section-title"><h2>🎧 Playlist Indo Populer</h2></div>
-      <div class="chip-row" id="genreChips">
-        <button class="chip active" data-genre="all">Semua</button>
-        <button class="chip" data-genre="pop">Pop</button>
-        <button class="chip" data-genre="indie">Indie</button>
-        <button class="chip" data-genre="dangdut">Dangdut</button>
-      </div>
-
-      <div class="track-list-header">
-        <span>#</span><span>Judul</span><span>Durasi</span><span></span>
-      </div>
-      <div id="trackList"></div>
-
-      <div class="section-title" style="margin-top:20px;"><h2>🔥 Playlist Pilihan</h2></div>
-      <div class="card-grid" id="playlistCards"></div>
     </div>
 
     <!-- SEARCH -->
     <div class="page" id="page-search">
-      <div style="padding:20px 28px;">
-        <div class="search-box" style="max-width:600px;">
-          <input type="text" id="searchInputPage" placeholder="Cari lagu, artis, atau album...">
-          <button id="searchBtnPage">→</button>
+      <div class="section">
+        <h2 class="section-title">🔍 Cari Musik</h2>
+        <p style="color: var(--text-sub); font-size: 13px; margin-top: 6px;">Ketik minimal 3 huruf buat auto-search</p>
+      </div>
+
+      <div class="section">
+        <h3 style="font-size: 14px; font-weight: 700; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">Genre Populer</h3>
+        <div class="hero-grid" id="genre-grid"></div>
+      </div>
+
+      <div class="section" id="search-results-section" style="display:none;">
+        <div class="section-header">
+          <h2 class="section-title" id="search-section-title">Hasil</h2>
         </div>
-      </div>
-      <div class="chip-row">
-        <button class="chip" onclick="quickSearch('lagu indonesia populer')">🇮🇩 Indo Populer</button>
-        <button class="chip" onclick="quickSearch('top global hits')">🌍 Global</button>
-        <button class="chip" onclick="quickSearch('kpop hits')">🇰🇷 K-Pop</button>
-        <button class="chip" onclick="quickSearch('lofi beats')">☕ Lofi</button>
-        <button class="chip" onclick="quickSearch('jazz relax')">🎷 Jazz</button>
-        <button class="chip" onclick="quickSearch('rock classics')">🎸 Rock</button>
-      </div>
-      <div class="section-title"><h2 id="searchResultTitle">Hasil Pencarian</h2></div>
-      <div class="search-results" id="searchResultsPage" style="padding:0 28px; max-height:none;">
-        <div class="info-box">🔍 Ketik sesuatu di kotak pencarian, atau pilih chip genre di atas.</div>
+        <div class="card-grid" id="search-card-grid"></div>
       </div>
     </div>
 
-    <!-- COLLECTION -->
-    <div class="page" id="page-collection">
-      <div class="section-title"><h2>📚 Koleksi Kamu</h2></div>
-      <div class="chip-row">
-        <button class="chip active" data-coll="playlists">Playlist</button>
-        <button class="chip" data-coll="liked">Lagu Disukai</button>
-        <button class="chip" data-coll="recent">Baru Diputar</button>
+    <!-- LIBRARY -->
+    <div class="page" id="page-library">
+      <div class="section">
+        <h2 class="section-title">📚 Koleksi Lo</h2>
       </div>
-      <div class="collection-grid" id="collectionGrid"></div>
+
+      <div class="section">
+        <h3 style="font-size: 12px; font-weight: 800; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">Playlist</h3>
+        <div id="playlist-list"></div>
+      </div>
+
+      <div class="section">
+        <h3 style="font-size: 12px; font-weight: 800; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">❤️ Favorit</h3>
+        <div id="favorites-list"><div class="empty-state"><div class="ico">💔</div><div class="t">Belum ada favorit</div><div class="s">Tap ♡ di player buat simpen lagu</div></div></div>
+      </div>
+
+      <div class="section">
+        <h3 style="font-size: 12px; font-weight: 800; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">🕐 Recent</h3>
+        <div id="recent-list"><div class="empty-state"><div class="ico">🕐</div><div class="t">Belum ada riwayat</div><div class="s">Lagu yang lo play bakal muncul di sini</div></div></div>
+      </div>
+    </div>
+
+    <!-- PREMIUM -->
+    <div class="page" id="page-premium">
+      <div class="premium-hero">
+        <div class="premium-crown">👑</div>
+        <div class="premium-title">ZmZ Premium</div>
+        <div class="premium-sub">Dengerin tanpa batas. Tanpa iklan. Kualitas maksimal.</div>
+      </div>
+
+      <div class="premium-plans" id="premium-plans"></div>
+
+      <div class="premium-features">
+        <h3>✨ Fitur Premium</h3>
+        <div class="pf-item">
+          <div class="pf-icon">🚫</div>
+          <div class="pf-text"><div class="t">Bebas Iklan</div><div class="s">Nggak ada gangguan iklan</div></div>
+        </div>
+        <div class="pf-item">
+          <div class="pf-icon">🎵</div>
+          <div class="pf-text"><div class="t">Audio 320kbps</div><div class="s">Kualitas maksimal</div></div>
+        </div>
+        <div class="pf-item">
+          <div class="pf-icon">📥</div>
+          <div class="pf-text"><div class="t">Download Offline</div><div class="s">Dengerin tanpa internet</div></div>
+        </div>
+        <div class="pf-item">
+          <div class="pf-icon">⏭</div>
+          <div class="pf-text"><div class="t">Skip Unlimited</div><div class="s">Bebas skip lagu</div></div>
+        </div>
+        <div class="pf-item">
+          <div class="pf-icon">🎛️</div>
+          <div class="pf-text"><div class="t">Equalizer Advanced</div><div class="s">Atur suara sesuai selera</div></div>
+        </div>
+      </div>
     </div>
 
     <!-- PROFILE -->
     <div class="page" id="page-profile">
       <div class="profile-header">
-        <div class="profile-avatar" id="profileAvatar">U</div>
-        <div class="profile-info">
-          <div class="profile-type" id="profileType">Akun Gratis</div>
-          <div class="profile-name" id="profileName">User Musify</div>
-          <div class="profile-stats">
-            <span><b id="statPlaylist">4</b> Playlist</span>
-            <span><b id="statLiked">0</b> Disukai</span>
-            <span><b id="statPlayed">0</b> Diputar</span>
-          </div>
+        <div class="profile-avatar" onclick="showToast('📷 Ganti foto profil')">Z</div>
+        <div class="profile-name" id="profile-name">ZmZ User</div>
+        <div class="profile-sub" id="profile-email">user@zmz.music</div>
+        <div class="profile-plan-badge free" id="profile-plan-badge">FREE PLAN</div>
+        <div class="profile-stats">
+          <div class="stat"><div class="stat-num" id="stat-fav">0</div><div class="stat-label">Favorit</div></div>
+          <div class="stat"><div class="stat-num" id="stat-recent">0</div><div class="stat-label">Recent</div></div>
+          <div class="stat"><div class="stat-num" id="stat-playlist">5</div><div class="stat-label">Playlist</div></div>
         </div>
       </div>
-      <div class="profile-menu">
-        <div class="menu-item" onclick="showToast('✏️ Fitur Edit Profil')">
-          <div class="menu-icon">✏️</div>
-          <div class="menu-text"><div class="menu-title">Edit Profil</div><div class="menu-sub">Ubah nama & foto</div></div>
-          <div class="menu-arrow">›</div>
+
+      <div class="menu-list">
+        <div class="menu-item" onclick="switchPage('premium')">
+          <div class="menu-icon">👑</div>
+          <div class="menu-text"><div class="title">Upgrade ke Premium</div><div class="sub">Nikmati fitur tanpa batas</div></div>
+          <span class="menu-arrow">›</span>
         </div>
-        <div class="menu-item" onclick="showToast('⭐ Fitur Premium')">
-          <div class="menu-icon">⭐</div>
-          <div class="menu-text"><div class="menu-title">Upgrade ke Premium</div><div class="menu-sub">Tanpa iklan & offline</div></div>
-          <div class="menu-arrow">›</div>
-        </div>
-        <div class="menu-item" onclick="showToast('⚙️ Fitur Pengaturan')">
+        <div class="menu-item" onclick="showToast('⚙️ Pengaturan segera hadir')">
           <div class="menu-icon">⚙️</div>
-          <div class="menu-text"><div class="menu-title">Pengaturan Akun</div><div class="menu-sub">Privasi & notifikasi</div></div>
-          <div class="menu-arrow">›</div>
+          <div class="menu-text"><div class="title">Pengaturan</div><div class="sub">Audio, tampilan, notifikasi</div></div>
+          <span class="menu-arrow">›</span>
         </div>
-        <div class="menu-item" onclick="logout()">
-          <div class="menu-icon" style="background:rgba(255,71,87,0.15);">🚪</div>
-          <div class="menu-text"><div class="menu-title" style="color:#ff4757;">Keluar</div><div class="menu-sub">Logout dari akun ini</div></div>
-          <div class="menu-arrow">›</div>
+        <div class="menu-item" onclick="showToast('🎨 Tema segera hadir')">
+          <div class="menu-icon">🎨</div>
+          <div class="menu-text"><div class="title">Tema</div><div class="sub">Glass, Dark, Light</div></div>
+          <span class="menu-arrow">›</span>
+        </div>
+        <div class="menu-item" onclick="clearData()">
+          <div class="menu-icon">🗑️</div>
+          <div class="menu-text"><div class="title">Hapus Data</div><div class="sub">Reset favorit & recent</div></div>
+          <span class="menu-arrow">›</span>
         </div>
       </div>
-    </div>
-  </main>
 
-  <!-- RIGHT PANEL -->
-  <aside class="right-panel">
-    <div>
-      <div class="panel-title">🔍 Cari & Tambah</div>
-      <div class="search-box">
-        <input type="text" id="searchInput" placeholder="Ketik judul lagu...">
-        <button id="searchBtn">→</button>
+      <div class="section" style="text-align:center; padding-bottom: 40px;">
+        <p style="color: var(--text-sub); font-size: 12px;">ZmZ Music v1.0 • Made with 💚</p>
       </div>
     </div>
-    <div id="searchResultsWrap" style="display:none;">
-      <div class="panel-title">📋 Hasil</div>
-      <div class="search-results" id="searchResults"></div>
-    </div>
-    <div>
-      <div class="panel-title">⚡ Pilihan Cepat</div>
-      <div class="quick-picks">
-        <button class="pick" data-q="lagu indonesia populer"><span>🇮🇩</span>Indo Populer</button>
-        <button class="pick" data-q="top global hits"><span>🌍</span>Global</button>
-        <button class="pick" data-q="lofi chill"><span>☕</span>Lofi</button>
-        <button class="pick" data-q="lagu tidur relax"><span>😴</span>Tidur</button>
-      </div>
-    </div>
-    <div class="info-box" id="infoBox">
-      💡 <b>Auto-play aktif!</b><br>
-      Lagu akan langsung diputar setelah login.<br>
-      Cari lagu → klik + untuk tambah.
-    </div>
-  </aside>
 
-  <!-- PLAYER -->
-  <div class="player">
-    <div class="np-left">
-      <div class="np-cover" id="npCover">🎵</div>
-      <div class="np-info">
-        <div class="np-title" id="npTitle">Memuat...</div>
-        <div class="np-artist" id="npArtist">—</div>
-      </div>
-      <button class="np-like" id="npLike">♡</button>
-    </div>
-    <div class="np-center">
-      <div class="np-controls">
-        <button class="np-btn" id="shuffleBtn">🔀</button>
-        <button class="np-btn" id="prevBtn">⏮</button>
-        <button class="np-btn play" id="playBtn">▶</button>
-        <button class="np-btn" id="nextBtn">⏭</button>
-        <button class="np-btn on" id="repeatBtn">🔁</button>
-      </div>
-      <div class="np-progress">
-        <span class="np-time" id="currentTime">0:00</span>
-        <div class="bar-wrap" id="progressBar"><div class="bar-fill" id="progressFill"></div></div>
-        <span class="np-time" id="duration">0:00</span>
-      </div>
-    </div>
-    <div class="np-right">
-      <button class="np-btn">🔊</button>
-      <div class="vol-wrap" id="volBar"><div class="vol-fill" id="volFill"></div></div>
-    </div>
   </div>
 </div>
 
-<!-- YOUTUBE HIDDEN PLAYER -->
-<div id="ytplayer"></div>
+<!-- PLAYER BAR -->
+<div class="player-bar hidden" id="player-bar" onclick="openNowPlaying()">
+  <div class="player-progress">
+    <div class="player-progress-fill" id="player-progress-fill"></div>
+  </div>
+  <div class="p-img" id="p-img-wrap"><img id="p-img" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='56' height='56'><rect width='56' height='56' fill='%23282828'/></svg>" alt=""></div>
+  <div class="p-info">
+    <div class="p-title" id="p-title">-</div>
+    <div class="p-artist" id="p-artist">-</div>
+  </div>
+  <div class="p-controls" onclick="event.stopPropagation()">
+    <button class="p-btn" id="p-fav" onclick="toggleFav()">♡</button>
+    <button class="p-btn play-main" id="p-play" onclick="togglePlay()">▶</button>
+  </div>
+</div>
 
-<div class="toast" id="toast"></div>
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <button class="nav-btn active" data-page="home" onclick="switchPage('home')">
+    <span class="nav-ico">🏠</span>
+    <span>Home</span>
+  </button>
+  <button class="nav-btn" data-page="search" onclick="switchPage('search')">
+    <span class="nav-ico">🔍</span>
+    <span>Search</span>
+  </button>
+  <button class="nav-btn" data-page="library" onclick="switchPage('library')">
+    <span class="nav-ico">📚</span>
+    <span>Koleksi</span>
+  </button>
+  <button class="nav-btn premium" data-page="premium" onclick="switchPage('premium')">
+    <span class="nav-ico">👑</span>
+    <span>Premium</span>
+  </button>
+  <button class="nav-btn" data-page="profile" onclick="switchPage('profile')">
+    <span class="nav-ico">👤</span>
+    <span>Profile</span>
+  </button>
+</div>
+
+<!-- NOW PLAYING MODAL -->
+<div class="now-playing-modal" id="now-playing">
+  <div class="np-header">
+    <button class="np-close" onclick="closeNowPlaying()">⌄</button>
+    <div class="np-label">NOW PLAYING</div>
+    <div style="width: 36px;"></div>
+  </div>
+  <div class="np-art"><img id="np-img" src="" alt=""></div>
+  <div class="np-title" id="np-title">-</div>
+  <div class="np-artist" id="np-artist">-</div>
+  <div class="np-progress">
+    <span id="np-cur">0:00</span>
+    <div class="np-track" onclick="seekNP(event)">
+      <div class="np-fill" id="np-fill"></div>
+    </div>
+    <span id="np-dur">0:00</span>
+  </div>
+  <div class="np-controls">
+    <button class="np-ctrl" id="np-shuffle" onclick="toggleShuffle()">🔀</button>
+    <button class="np-ctrl" onclick="prevTrack()">⏮</button>
+    <button class="np-ctrl np-play" id="np-play" onclick="togglePlay()">▶</button>
+    <button class="np-ctrl" onclick="nextTrack()">⏭</button>
+    <button class="np-ctrl" id="np-repeat" onclick="toggleRepeat()">🔁</button>
+  </div>
+  <div class="np-extra">
+    <button class="np-ctrl" id="np-fav" onclick="toggleFav()">♡</button>
+    <button class="np-ctrl" onclick="toggleMute()" id="np-mute">🔊</button>
+    <button class="np-ctrl" onclick="showToast('📤 Share lagu')">📤</button>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-icon" id="modal-icon">✅</div>
+    <div class="modal-title" id="modal-title">Berhasil</div>
+    <div class="modal-desc" id="modal-desc">-</div>
+    <button class="modal-btn" id="modal-btn-primary">OK</button>
+    <button class="modal-btn secondary" id="modal-btn-secondary" style="display:none;">Batal</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">-</div>
+
+<div id="yt-player"></div>
 
 <script>
-/* =========================================================
-   CONFIG
-   ========================================================= */
-// Worker URL (opsional — untuk search). Kalau kosong, pakai Invidious fallback.
-const SEARCH_WORKER = ''; // Contoh: 'https://musify-search.username.workers.dev'
+// ================== CONFIG ==================
+const API_KEY = 'AIzaSyBxkrriWyJIbdKjBqsOJodTJAoMdhbPkR4';
+// ============================================
 
-/* =========================================================
-   PLAYLIST DATA — video confirmed embeddable
-   ========================================================= */
-const PLAYLISTS = {
-  indo: {
-    name: "Indo Populer", emoji: "🇮🇩", color: "linear-gradient(135deg,#e91e63,#c2185b)",
-    tracks: [
-      { id: "dQw4w9WgXcQ", title: "Bertaut", artist: "Nadin Amizah", album: "Indo Pop", genre: "indie" },
-      { id: "9bZkp7q19f0", title: "Hati-Hati di Jalan", artist: "Tulus", album: "Indo Pop", genre: "pop" },
-      { id: "3JZ_D3ELwOQ", title: "Monokrom", artist: "Tulus", album: "Indo Pop", genre: "pop" },
-      { id: "kXYiU_JCYtU", title: "Melukis Senja", artist: "Budi Doremi", album: "Indo Pop", genre: "pop" },
-      { id: "60ItHLz5WEA", title: "Zona Nyaman", artist: "Fourtwnty", album: "Indo Indie", genre: "indie" },
-      { id: "7wtfhZwyrcc", title: "Akad", artist: "Payung Teduh", album: "Indo Indie", genre: "indie" },
-      { id: "uelHwf8o7_U", title: "Cinta Luar Biasa", artist: "Andmesh", album: "Indo Pop", genre: "pop" },
-      { id: "SlPhMPnQ58k", title: "Kupu-Kupu", artist: "Tiara Andini", album: "Indo Pop", genre: "pop" }
-    ]
-  },
-  barat: {
-    name: "Barat Hits", emoji: "🌍", color: "linear-gradient(135deg,#3f51b5,#1a237e)",
-    tracks: [
-      { id: "JGwWNGJdvx8", title: "Shape of You", artist: "Ed Sheeran", album: "Divide" },
-      { id: "RgKAFK5djSk", title: "See You Again", artist: "Wiz Khalifa", album: "Furious 7" },
-      { id: "OPf0YbXqDm0", title: "Uptown Funk", artist: "Mark Ronson", album: "Uptown Special" },
-      { id: "fJ9rUzIMcZQ", title: "Bohemian Rhapsody", artist: "Queen", album: "A Night at the Opera" },
-      { id: "hT_nvWreIhg", title: "Counting Stars", artist: "OneRepublic", album: "Native" },
-      { id: "YQHsXMglC9A", title: "Hello", artist: "Adele", album: "25" }
-    ]
-  },
-  chill: {
-    name: "Chill Vibes", emoji: "🌙", color: "linear-gradient(135deg,#00bcd4,#0097a7)",
-    tracks: [
-      { id: "jfKfPfyJRdk", title: "Lofi Hip Hop Radio", artist: "Lofi Girl", album: "Chill" },
-      { id: "5qap5aO4i9A", title: "Lofi Beats to Relax", artist: "Lofi Girl", album: "Chill" },
-      { id: "n61ULEU7CO0", title: "Best Lofi Mix", artist: "Chill Nation", album: "Chill" }
-    ]
-  },
-  lofi: {
-    name: "Lofi Beats", emoji: "☕", color: "linear-gradient(135deg,#9c27b0,#6a1b9a)",
-    tracks: [
-      { id: "jfKfPfyJRdk", title: "Lofi Hip Hop Radio", artist: "Lofi Girl", album: "Lofi" },
-      { id: "lTRiuFIWV54", title: "Study Lofi Mix", artist: "Chill Beats", album: "Lofi" }
-    ]
-  }
-};
-
-/* =========================================================
-   STATE
-   ========================================================= */
-let currentUser = null;
-let playlist = [...PLAYLISTS.indo.tracks];
-let currentPlaylistKey = 'indo';
-let currentIndex = 0;
+// ================== STATE ==================
+let player = null;
+let playlist = [];
+let currentIndex = -1;
 let isPlaying = false;
-let isShuffle = false;
-let isRepeat = true;
-let playerReady = false;
-let ytPlayer = null;
-let progressTimer = null;
-let ytApiLoaded = false;
-let pendingAutoplay = false;
-let likedTracks = JSON.parse(localStorage.getItem('musify_liked') || '[]');
-let playedHistory = JSON.parse(localStorage.getItem('musify_history') || '[]');
+let isMuted = false;
+let isShuffled = false;
+let isRepeating = false;
+let progressInterval = null;
+let currentPage = 'home';
+let user = JSON.parse(localStorage.getItem('zmz_user') || '{"name":"ZmZ User","email":"user@zmz.music","premium":false,"plan":null}');
+let favorites = JSON.parse(localStorage.getItem('zmz_favorites') || '[]');
+let recent = JSON.parse(localStorage.getItem('zmz_recent') || '[]');
 
-const $ = id => document.getElementById(id);
-const toastEl = $('toast');
-
-/* =========================================================
-   YOUTUBE IFRAME API — dimuat sejak awal
-   Container #ytplayer SUDAH ada di DOM
-   ========================================================= */
+// ================== YOUTUBE API ==================
 function loadYouTubeAPI() {
-  if (ytApiLoaded) return;
-  ytApiLoaded = true;
-  
-  window.onYouTubeIframeAPIReady = function() {
-    console.log('✅ YouTube API ready');
-    ytPlayer = new YT.Player('ytplayer', {
-      height: '200',
-      width: '200',
-      videoId: playlist[0].id,
-      playerVars: {
-        'playsinline': 1,
-        'rel': 0,
-        'modestbranding': 1,
-        'controls': 0,
-        'disablekb': 1,
-        'autoplay': 0,
-        'origin': window.location.origin
-      },
-      events: {
-        'onReady': onPlayerReady,
-        'onStateChange': onStateChange,
-        'onError': onError
-      }
-    });
-  };
-  
   const tag = document.createElement('script');
-  tag.src = 'https://www.youtube.com/iframe_api';
+  tag.src = "https://www.youtube.com/iframe_api";
   document.head.appendChild(tag);
 }
 
-function onPlayerReady() {
-  console.log('✅ Player ready');
-  playerReady = true;
-  ytPlayer.setVolume(70);
-  
-  // Kalau ada pending autoplay (user baru login), langsung play
-  if (pendingAutoplay) {
-    pendingAutoplay = false;
-    setTimeout(() => {
-      playTrack(0, true);
-    }, 300);
-  } else {
-    renderTrackList();
-  }
-}
+window.onYouTubeIframeAPIReady = function() {
+  player = new YT.Player('yt-player', {
+    height: '1', width: '1',
+    playerVars: {
+      autoplay: 0, controls: 0, disablekb: 1, fs: 0,
+      modestbranding: 1, rel: 0, playsinline: 1
+    },
+    events: {
+      onReady: () => console.log('✅ YT Ready'),
+      onStateChange: onPlayerStateChange
+    }
+  });
+};
 
-function onStateChange(event) {
-  const S = YT.PlayerState;
-  if (event.data === S.PLAYING) {
+function onPlayerStateChange(event) {
+  if (event.data === YT.PlayerState.ENDED) {
+    if (isRepeating) playTrack(currentIndex);
+    else nextTrack();
+  }
+  if (event.data === YT.PlayerState.PLAYING) {
     isPlaying = true;
-    $('playBtn').textContent = '❚❚';
-    $('bigPlay').textContent = '❚❚';
-    $('visualizer').classList.add('playing');
-    startProgress();
-    renderTrackList();
-  } else if (event.data === S.PAUSED) {
+    updatePlayButtons(true);
+    startProgressUpdater();
+  }
+  if (event.data === YT.PlayerState.PAUSED) {
     isPlaying = false;
-    $('playBtn').textContent = '▶';
-    $('bigPlay').textContent = '▶';
-    $('visualizer').classList.remove('playing');
-    stopProgress();
-    renderTrackList();
-  } else if (event.data === S.ENDED) {
-    stopProgress();
-    if (isRepeat) {
-      ytPlayer.seekTo(0);
-      ytPlayer.playVideo();
-    } else {
-      nextTrack();
-    }
+    updatePlayButtons(false);
   }
 }
 
-function onError(event) {
-  console.warn('Video error:', event.data);
-  showToast('⚠ Skip lagu...', true);
-  setTimeout(() => nextTrack(), 800);
+function updatePlayButtons(playing) {
+  const icon = playing ? '⏸' : '▶';
+  const pPlay = document.getElementById('p-play');
+  const npPlay = document.getElementById('np-play');
+  if (pPlay) pPlay.textContent = icon;
+  if (npPlay) npPlay.textContent = icon;
 }
 
-function startProgress() {
-  stopProgress();
-  progressTimer = setInterval(() => {
-    if (!playerReady || !ytPlayer.getDuration) return;
-    try {
-      const cur = ytPlayer.getCurrentTime() || 0;
-      const dur = ytPlayer.getDuration() || 0;
-      if (dur > 0) {
-        $('progressFill').style.width = (cur / dur * 100) + '%';
-        $('currentTime').textContent = fmt(cur);
-        $('duration').textContent = fmt(dur);
-      }
-    } catch(e) {}
-  }, 300);
+// ================== INIT ==================
+loadYouTubeAPI();
+window.addEventListener('load', () => {
+  renderHero();
+  renderGenres();
+  renderPremiumPlans();
+  renderPlaylists();
+  loadTrending();
+  updateUserUI();
+  updateLibraryUI();
+  updateGreeting();
+});
+
+// ================== GREETING ==================
+function updateGreeting() {
+  const hour = new Date().getHours();
+  let greeting = 'Hai';
+  if (hour < 12) greeting = 'Selamat pagi';
+  else if (hour < 15) greeting = 'Selamat siang';
+  else if (hour < 18) greeting = 'Selamat sore';
+  else greeting = 'Selamat malam';
+
+  const name = user.name.split(' ')[0];
+  document.getElementById('greeting-name').textContent = greeting + ', ' + name;
 }
 
-function stopProgress() {
-  if (progressTimer) { clearInterval(progressTimer); progressTimer = null; }
+// ================== PAGE SWITCH ==================
+function switchPage(page) {
+  currentPage = page;
+
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.nav-btn[data-page="${page}"]`).classList.add('active');
+
+  const searchWrap = document.getElementById('search-wrap');
+  if (page === 'home' || page === 'search') searchWrap.classList.remove('hidden');
+  else searchWrap.classList.add('hidden');
+
+  if (page === 'profile') updateProfileUI();
+
+  document.getElementById('main-scroll').scrollTop = 0;
 }
 
-function fmt(s) {
-  if (!s || isNaN(s)) return '0:00';
-  const m = Math.floor(s / 60);
-  const sec = Math.floor(s % 60);
-  return `${m}:${sec < 10 ? '0' : ''}${sec}`;
+// ================== API FETCH ==================
+async function ytFetch(endpoint, params) {
+  const url = new URL('https://www.googleapis.com/youtube/v3/' + endpoint);
+  params.key = API_KEY;
+  Object.keys(params).forEach(k => url.searchParams.append(k, params[k]));
+  const res = await fetch(url);
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message);
+  return data;
 }
 
-/* =========================================================
-   LOGIN
-   ========================================================= */
-loadYouTubeAPI(); // Muat API dari awal
+// ================== HERO ==================
+function renderHero() {
+  const heroData = [
+    { title: 'Lofi Chill', emoji: '🎧', query: 'lofi hip hop' },
+    { title: 'Top Hits ID', emoji: '🔥', query: 'top hits indonesia 2026' },
+    { title: 'Dangdut Koplo', emoji: '💃', query: 'dangdut koplo' },
+    { title: 'Rock Indonesia', emoji: '🎸', query: 'rock indonesia' },
+    { title: 'EDM 2026', emoji: '⚡', query: 'edm 2026' },
+    { title: 'K-Pop', emoji: '🌸', query: 'kpop 2026' }
+  ];
 
-const savedUser = localStorage.getItem('musify_user');
-if (savedUser) {
+  const grid = document.getElementById('hero-grid');
+  grid.innerHTML = heroData.map(h => `
+    <div class="hero-card" onclick="doQuickSearch('${h.query.replace(/'/g, "\\'")}')">
+      <div class="hero-emoji">${h.emoji}</div>
+      <div class="hero-title">${h.title}</div>
+    </div>
+  `).join('');
+}
+
+// ================== GENRES ==================
+function renderGenres() {
+  const genres = [
+    { name: 'Pop', emoji: '🎤', q: 'pop indonesia' },
+    { name: 'Rock', emoji: '🎸', q: 'rock' },
+    { name: 'Jazz', emoji: '🎷', q: 'jazz' },
+    { name: 'Hip Hop', emoji: '🎧', q: 'hip hop' },
+    { name: 'EDM', emoji: '⚡', q: 'edm' },
+    { name: 'Klasik', emoji: '🎻', q: 'classical' },
+    { name: 'Dangdut', emoji: '💃', q: 'dangdut' },
+    { name: 'Reggae', emoji: '🌴', q: 'reggae' }
+  ];
+
+  const grid = document.getElementById('genre-grid');
+  grid.innerHTML = genres.map(g => `
+    <div class="hero-card" onclick="doQuickSearch('${g.q}')">
+      <div class="hero-emoji">${g.emoji}</div>
+      <div class="hero-title">${g.name}</div>
+    </div>
+  `).join('');
+}
+
+// ================== TRENDING ==================
+async function loadTrending() {
+  document.getElementById('home-section-title')?.textContent;
+  const grid = document.getElementById('home-card-grid');
+  grid.innerHTML = '<div class="loading">Loading lagu populer...</div>';
+
   try {
-    currentUser = JSON.parse(savedUser);
-    showApp(false);
-  } catch(e) {}
-}
+    const data = await ytFetch('search', {
+      part: 'snippet',
+      type: 'video',
+      videoCategoryId: '10',
+      maxResults: 20,
+      q: 'lagu indonesia terbaru 2026',
+      regionCode: 'ID',
+      order: 'viewCount'
+    });
 
-$('loginGoogle').addEventListener('click', () => {
-  doLogin({
-    name: "User Google",
-    email: "user@gmail.com",
-    provider: "google",
-    avatar: "G",
-    color: "linear-gradient(135deg,#4285f4,#34a853)"
-  });
-});
+    playlist = data.items.map(item => ({
+      id: item.id.videoId,
+      title: item.snippet.title,
+      artist: item.snippet.channelTitle,
+      thumb: item.snippet.thumbnails.medium.url
+    }));
 
-$('loginFacebook').addEventListener('click', () => {
-  doLogin({
-    name: "User Facebook",
-    email: "user@facebook.com",
-    provider: "facebook",
-    avatar: "f",
-    color: "linear-gradient(135deg,#1877F2,#0d65d9)"
-  });
-});
-
-$('loginGuest').addEventListener('click', () => {
-  doLogin({
-    name: "Tamu",
-    email: "guest@musify.app",
-    provider: "guest",
-    avatar: "👤",
-    color: "linear-gradient(135deg,#666,#333)"
-  });
-});
-
-function doLogin(user) {
-  currentUser = user;
-  localStorage.setItem('musify_user', JSON.stringify(user));
-  pendingAutoplay = true; // Tandai: begitu player ready, langsung play
-  showApp(true);
-  showToast('✅ Selamat datang, ' + user.name + '!');
-}
-
-function showApp(withAutoplay) {
-  $('loginScreen').classList.add('hide');
-  $('app').classList.add('show');
-  
-  const avatar = $('userAvatar');
-  const profileAvatar = $('profileAvatar');
-  const initial = currentUser.name.charAt(0).toUpperCase();
-  avatar.innerHTML = currentUser.avatar || initial;
-  profileAvatar.innerHTML = currentUser.avatar || initial;
-  avatar.style.background = currentUser.color || 'linear-gradient(135deg,#1DB954,#0d7a35)';
-  profileAvatar.style.background = currentUser.color || 'linear-gradient(135deg,#1DB954,#0d7a35)';
-  $('userName').textContent = currentUser.name;
-  $('profileName').textContent = currentUser.name;
-  $('profileType').textContent = currentUser.provider === 'guest' ? 'Akun Tamu' : 
-    (currentUser.provider === 'google' ? 'Akun Google' : 'Akun Facebook');
-  
-  loadPlaylist('indo', withAutoplay);
-  renderPlaylistCards();
-  renderFavList();
-  updateStats();
-}
-
-function logout() {
-  if (!confirm('Yakin mau keluar?')) return;
-  localStorage.removeItem('musify_user');
-  location.reload();
-}
-
-/* =========================================================
-   LOAD PLAYLIST & TRACK
-   ========================================================= */
-function loadPlaylist(key, autoplay = false) {
-  currentPlaylistKey = key;
-  playlist = [...PLAYLISTS[key].tracks];
-  currentIndex = 0;
-  document.querySelectorAll('.pl-item').forEach(el => {
-    el.classList.toggle('active', el.dataset.playlist === key);
-  });
-  renderTrackList();
-  if (playlist.length > 0) {
-    if (playerReady) {
-      loadTrack(0, autoplay);
-    }
+    renderCards(playlist, 'home-card-grid');
+  } catch (err) {
+    grid.innerHTML = '<div class="loading">❌ ' + err.message + '</div>';
   }
 }
 
-function loadTrack(index, autoplay = true) {
-  if (!playerReady || index < 0 || index >= playlist.length) return;
+// ================== SEARCH ==================
+async function doSearch() {
+  const q = document.getElementById('search-input').value.trim();
+  if (!q || q.length < 3) return;
+  doQuickSearch(q);
+}
+
+async function doQuickSearch(q) {
+  switchPage('search');
+  document.getElementById('search-input').value = q;
+  document.getElementById('search-clear').classList.add('show');
+  document.getElementById('search-section-title').textContent = `Hasil "${q}"`;
+  document.getElementById('search-results-section').style.display = 'block';
+
+  const grid = document.getElementById('search-card-grid');
+  grid.innerHTML = '<div class="loading">Lagi nyari...</div>';
+
+  try {
+    const data = await ytFetch('search', {
+      part: 'snippet',
+      type: 'video',
+      videoCategoryId: '10',
+      maxResults: 20,
+      q: q,
+      regionCode: 'ID'
+    });
+
+    playlist = data.items.map(item => ({
+      id: item.id.videoId,
+      title: item.snippet.title,
+      artist: item.snippet.channelTitle,
+      thumb: item.snippet.thumbnails.medium.url
+    }));
+
+    renderCards(playlist, 'search-card-grid');
+  } catch (err) {
+    grid.innerHTML = '<div class="loading">❌ ' + err.message + '</div>';
+  }
+}
+
+function clearSearch() {
+  document.getElementById('search-input').value = '';
+  document.getElementById('search-clear').classList.remove('show');
+  document.getElementById('search-results-section').style.display = 'none';
+}
+
+// ================== RENDER CARDS ==================
+function renderCards(items, gridId) {
+  const grid = document.getElementById(gridId);
+  if (!items.length) {
+    grid.innerHTML = '<div class="loading">Nggak ada hasil</div>';
+    return;
+  }
+
+  grid.innerHTML = items.map((item, i) => `
+    <div class="card" onclick="playTrack(${i})">
+      <div class="card-img">
+        <img src="${item.thumb}" alt="" loading="lazy"
+             onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect width=%22200%22 height=%22200%22 fill=%22%23282828%22/></svg>'">
+        <button class="card-play-btn" onclick="event.stopPropagation(); playTrack(${i})">▶</button>
+      </div>
+      <div class="card-title" title="${escapeHtml(item.title)}">${escapeHtml(item.title)}</div>
+      <div class="card-artist">${escapeHtml(item.artist)}</div>
+    </div>
+  `).join('');
+}
+
+// ================== PLAY ==================
+function playTrack(index) {
+  if (!player || !playlist[index]) return;
   currentIndex = index;
-  const track = playlist[currentIndex];
+  const track = playlist[index];
 
-  $('heroTitle').textContent = track.title;
-  $('heroArtist').textContent = track.artist;
-  $('npTitle').textContent = track.title;
-  $('npArtist').textContent = track.artist;
-  $('heroCover').innerHTML = `<img src="https://img.youtube.com/vi/${track.id}/hqdefault.jpg" onerror="this.parentElement.textContent='🎵'">`;
-  $('npCover').innerHTML = `<img src="https://img.youtube.com/vi/${track.id}/default.jpg" onerror="this.parentElement.textContent='🎵'">`;
+  player.loadVideoById(track.id);
+  document.getElementById('p-title').textContent = track.title;
+  document.getElementById('p-artist').textContent = track.artist;
+  document.getElementById('p-img').src = track.thumb;
+  document.getElementById('player-bar').classList.remove('hidden');
 
-  if (autoplay) {
-    ytPlayer.loadVideoById(track.id);
-    isPlaying = true;
-    $('playBtn').textContent = '❚❚';
-    $('bigPlay').textContent = '❚❚';
-    $('visualizer').classList.add('playing');
-  } else {
-    ytPlayer.cueVideoById(track.id);
-  }
+  document.getElementById('np-title').textContent = track.title;
+  document.getElementById('np-artist').textContent = track.artist;
+  document.getElementById('np-img').src = track.thumb;
 
-  playedHistory.unshift({ id: track.id, title: track.title, artist: track.artist, ts: Date.now() });
-  playedHistory = playedHistory.slice(0, 50);
-  localStorage.setItem('musify_history', JSON.stringify(playedHistory));
+  updateFavButton();
 
-  updateLikeUI();
-  updateStats();
-  renderTrackList();
-}
-
-function playTrack(index, autoplay = true) {
-  loadTrack(index, autoplay);
+  recent = recent.filter(r => r.id !== track.id);
+  recent.unshift(track);
+  recent = recent.slice(0, 20);
+  localStorage.setItem('zmz_recent', JSON.stringify(recent));
+  updateLibraryUI();
 }
 
 function togglePlay() {
-  if (!playerReady) { showToast('Player belum siap', true); return; }
-  if (playlist.length === 0) { showToast('Playlist kosong', true); return; }
-  if (isPlaying) ytPlayer.pauseVideo();
-  else ytPlayer.playVideo();
+  if (!player || currentIndex === -1) return;
+  if (isPlaying) player.pauseVideo();
+  else player.playVideo();
 }
 
 function nextTrack() {
-  if (playlist.length === 0) return;
-  let i;
-  if (isShuffle) {
-    i = Math.floor(Math.random() * playlist.length);
-    if (i === currentIndex && playlist.length > 1) i = (i + 1) % playlist.length;
-  } else {
-    i = (currentIndex + 1) % playlist.length;
+  if (isShuffled) {
+    currentIndex = Math.floor(Math.random() * playlist.length);
+    playTrack(currentIndex);
+  } else if (currentIndex < playlist.length - 1) {
+    playTrack(currentIndex + 1);
   }
-  loadTrack(i, true);
 }
 
 function prevTrack() {
-  if (playlist.length === 0) return;
-  let i;
-  if (isShuffle) i = Math.floor(Math.random() * playlist.length);
-  else i = (currentIndex - 1 + playlist.length) % playlist.length;
-  loadTrack(i, true);
+  if (currentIndex > 0) playTrack(currentIndex - 1);
 }
 
-function removeTrack(index) {
-  const wasCurrent = index === currentIndex;
-  playlist.splice(index, 1);
-  if (playlist.length === 0) {
-    currentIndex = 0;
-    isPlaying = false;
-    $('playBtn').textContent = '▶';
-    $('bigPlay').textContent = '▶';
-    $('heroTitle').textContent = 'Playlist Kosong';
-    $('heroArtist').textContent = '—';
-    $('npTitle').textContent = 'Belum ada lagu';
-    $('npArtist').textContent = '—';
-    $('heroCover').textContent = '🎵';
-    $('npCover').textContent = '🎵';
-    $('visualizer').classList.remove('playing');
-    stopProgress();
-    if (playerReady) ytPlayer.stopVideo();
-  } else if (wasCurrent) {
-    currentIndex = Math.min(index, playlist.length - 1);
-    loadTrack(currentIndex, true);
-  } else if (index < currentIndex) {
-    currentIndex--;
-  }
-  renderTrackList();
-  updateStats();
-  showToast('🗑 Dihapus');
+function toggleShuffle() {
+  isShuffled = !isShuffled;
+  document.getElementById('np-shuffle').classList.toggle('active', isShuffled);
+  showToast(isShuffled ? '🔀 Shuffle ON' : '🔀 Shuffle OFF');
 }
 
-/* =========================================================
-   LIKE
-   ========================================================= */
-function toggleLike(index) {
-  const track = playlist[index !== undefined ? index : currentIndex];
-  if (!track) return;
-  const pos = likedTracks.findIndex(t => t.id === track.id);
-  if (pos >= 0) {
-    likedTracks.splice(pos, 1);
+function toggleRepeat() {
+  isRepeating = !isRepeating;
+  document.getElementById('np-repeat').classList.toggle('active', isRepeating);
+  showToast(isRepeating ? '🔁 Repeat ON' : '🔁 Repeat OFF');
+}
+
+// ================== FAVORIT ==================
+function toggleFav() {
+  if (currentIndex === -1) return;
+  const track = playlist[currentIndex];
+  const idx = favorites.findIndex(f => f.id === track.id);
+  if (idx >= 0) {
+    favorites.splice(idx, 1);
     showToast('💔 Dihapus dari favorit');
   } else {
-    likedTracks.push({ id: track.id, title: track.title, artist: track.artist });
-    showToast('❤️ Ditambahkan ke favorit');
+    favorites.push(track);
+    showToast('❤️ Ditambah ke favorit');
   }
-  localStorage.setItem('musify_liked', JSON.stringify(likedTracks));
-  updateLikeUI();
-  renderTrackList();
-  renderFavList();
-  updateStats();
+  localStorage.setItem('zmz_favorites', JSON.stringify(favorites));
+  updateFavButton();
+  updateLibraryUI();
 }
 
-function updateLikeUI() {
-  if (playlist.length === 0) return;
+function updateFavButton() {
+  if (currentIndex === -1) return;
   const track = playlist[currentIndex];
-  const liked = likedTracks.some(t => t.id === track.id);
-  $('npLike').textContent = liked ? '♥' : '♡';
-  $('npLike').classList.toggle('liked', liked);
+  const isFav = favorites.some(f => f.id === track.id);
+  const icon = isFav ? '❤️' : '♡';
+  document.getElementById('p-fav').textContent = icon;
+  document.getElementById('np-fav').textContent = icon;
 }
 
-/* =========================================================
-   RENDER
-   ========================================================= */
-function renderTrackList() {
-  const list = $('trackList');
-  list.innerHTML = '';
-  $('heroCount').textContent = playlist.length + ' lagu';
+// ================== PROGRESS ==================
+function startProgressUpdater() {
+  if (progressInterval) clearInterval(progressInterval);
+  progressInterval = setInterval(() => {
+    if (!player || !player.getDuration) return;
+    const cur = player.getCurrentTime() || 0;
+    const dur = player.getDuration() || 0;
+    const pct = dur ? (cur / dur * 100) + '%' : '0%';
 
-  if (playlist.length === 0) {
-    list.innerHTML = `<div style="text-align:center;padding:60px 20px;color:rgba(255,255,255,0.4);">
-      <div style="font-size:64px;margin-bottom:16px;opacity:0.4;">🎵</div>
-      <h3 style="color:#fff;margin-bottom:8px;">Playlist Kosong</h3>
-      <p style="font-size:13px;">Pilih playlist lain atau cari lagu!</p>
-    </div>`;
-    return;
+    document.getElementById('player-progress-fill').style.width = pct;
+    document.getElementById('np-fill').style.width = pct;
+    document.getElementById('np-cur').textContent = formatTime(cur);
+    document.getElementById('np-dur').textContent = formatTime(dur);
+  }, 500);
+}
+
+function seekNP(event) {
+  if (!player) return;
+  const rect = event.currentTarget.getBoundingClientRect();
+  const pct = (event.clientX - rect.left) / rect.width;
+  const dur = player.getDuration() || 0;
+  player.seekTo(pct * dur, true);
+}
+
+function formatTime(sec) {
+  sec = Math.floor(sec);
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return m + ':' + (s < 10 ? '0' : '') + s;
+}
+
+// ================== NOW PLAYING MODAL ==================
+function openNowPlaying() {
+  document.getElementById('now-playing').classList.add('show');
+}
+
+function closeNowPlaying() {
+  document.getElementById('now-playing').classList.remove('show');
+}
+
+// ================== LIBRARY ==================
+function updateLibraryUI() {
+  const favList = document.getElementById('favorites-list');
+  if (favorites.length === 0) {
+    favList.innerHTML = '<div class="empty-state"><div class="ico">💔</div><div class="t">Belum ada favorit</div><div class="s">Tap ♡ di player buat simpen lagu</div></div>';
+  } else {
+    favList.innerHTML = favorites.map(t => `
+      <div class="lib-item" onclick="playFromList('fav', '${t.id}')">
+        <div class="lib-thumb"><img src="${t.thumb}" alt=""></div>
+        <div class="lib-info">
+          <div class="lib-name">${escapeHtml(t.title)}</div>
+          <div class="lib-sub">${escapeHtml(t.artist)}</div>
+        </div>
+        <button class="lib-action" onclick="event.stopPropagation(); removeFav('${t.id}')">❤️</button>
+      </div>
+    `).join('');
   }
 
-  playlist.forEach((track, i) => {
-    const isActive = i === currentIndex && isPlaying;
-    const isCurrent = i === currentIndex;
-    const liked = likedTracks.some(t => t.id === track.id);
-    const row = document.createElement('div');
-    row.className = 'track-row' + (isCurrent ? ' active' : '');
-    row.innerHTML = `
-      <div class="t-num">${isActive ? '<div class="eq"><span></span><span></span><span></span></div>' : (i + 1)}</div>
-      <div class="t-main">
-        <div class="t-thumb"><img src="https://img.youtube.com/vi/${track.id}/default.jpg" onerror="this.style.display='none';this.parentElement.textContent='🎵';"></div>
-        <div class="t-text">
-          <div class="t-name">${esc(track.title)}</div>
-          <div class="t-artist">${esc(track.artist)}</div>
+  const recList = document.getElementById('recent-list');
+  if (recent.length === 0) {
+    recList.innerHTML = '<div class="empty-state"><div class="ico">🕐</div><div class="t">Belum ada riwayat</div><div class="s">Lagu yang lo play bakal muncul di sini</div></div>';
+  } else {
+    recList.innerHTML = recent.map(t => `
+      <div class="lib-item" onclick="playFromList('recent', '${t.id}')">
+        <div class="lib-thumb"><img src="${t.thumb}" alt=""></div>
+        <div class="lib-info">
+          <div class="lib-name">${escapeHtml(t.title)}</div>
+          <div class="lib-sub">${escapeHtml(t.artist)}</div>
         </div>
       </div>
-      <div class="t-dur" data-dur="${track.id}">--:--</div>
-      <div class="t-actions">
-        <button class="t-btn like ${liked ? 'liked' : ''}" data-like="${i}">${liked ? '♥' : '♡'}</button>
-        <button class="t-btn del" data-remove="${i}">✕</button>
-      </div>
-    `;
-    row.addEventListener('click', (e) => {
-      if (e.target.dataset.remove !== undefined || e.target.dataset.like !== undefined) return;
-      if (isCurrent && isPlaying) togglePlay();
-      else loadTrack(i, true);
-    });
-    row.querySelector('[data-like]').addEventListener('click', (e) => { e.stopPropagation(); toggleLike(i); });
-    row.querySelector('[data-remove]').addEventListener('click', (e) => { e.stopPropagation(); removeTrack(i); });
-    list.appendChild(row);
-  });
-
-  // Ambil durasi tiap track
-  playlist.forEach(t => {
-    if (!t.dur && playerReady) {
-      // skip: durasi diambil via API terpisah, non-blocking
-    }
-  });
-}
-
-function renderPlaylistCards() {
-  const grid = $('playlistCards');
-  grid.innerHTML = '';
-  Object.entries(PLAYLISTS).forEach(([key, pl]) => {
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.innerHTML = `
-      <div class="card-img" style="background:${pl.color};">${pl.emoji}</div>
-      <div class="card-title">${pl.name}</div>
-      <div class="card-sub">${pl.tracks.length} lagu</div>
-    `;
-    card.addEventListener('click', () => {
-      loadPlaylist(key, true);
-      navigateTo('home');
-    });
-    grid.appendChild(card);
-  });
-}
-
-function renderFavList() {
-  const list = $('favList');
-  if (likedTracks.length === 0) {
-    list.innerHTML = `<div style="padding:12px 14px;font-size:12px;color:rgba(255,255,255,0.4);">Belum ada favorit</div>`;
-    return;
+    `).join('');
   }
-  list.innerHTML = likedTracks.slice(0, 4).map((t, i) => `
-    <div class="pl-item" data-fav="${i}">
-      <div class="pl-thumb" style="background:linear-gradient(135deg,#ff4081,#c2185b);">❤️</div>
-      <div><div class="pl-name">${esc(t.title.substring(0,20))}${t.title.length>20?'…':''}</div><div class="pl-sub">${esc(t.artist)}</div></div>
+
+  document.getElementById('stat-fav').textContent = favorites.length;
+  document.getElementById('stat-recent').textContent = recent.length;
+}
+
+function playFromList(type, id) {
+  const list = type === 'fav' ? favorites : recent;
+  playlist = list;
+  const idx = list.findIndex(t => t.id === id);
+  if (idx >= 0) playTrack(idx);
+}
+
+function removeFav(id) {
+  favorites = favorites.filter(f => f.id !== id);
+  localStorage.setItem('zmz_favorites', JSON.stringify(favorites));
+  updateLibraryUI();
+  updateFavButton();
+  showToast('💔 Dihapus dari favorit');
+}
+
+function renderPlaylists() {
+  const playlists = [
+    { name: 'Lofi Chill', emoji: '🎧', sub: 'Playlist • ZmZ', q: 'lofi hip hop' },
+    { name: 'Top Hits ID', emoji: '🔥', sub: 'Playlist • ZmZ', q: 'top hits indonesia 2026' },
+    { name: 'Dangdut Koplo', emoji: '💃', sub: 'Playlist • ZmZ', q: 'dangdut koplo' },
+    { name: 'Rock Indonesia', emoji: '🎸', sub: 'Playlist • ZmZ', q: 'rock indonesia' },
+    { name: 'EDM 2026', emoji: '⚡', sub: 'Playlist • ZmZ', q: 'edm 2026' }
+  ];
+
+  document.getElementById('playlist-list').innerHTML = playlists.map(p => `
+    <div class="lib-item" onclick="doQuickSearch('${p.q}')">
+      <div class="lib-thumb">${p.emoji}</div>
+      <div class="lib-info">
+        <div class="lib-name">${p.name}</div>
+        <div class="lib-sub">${p.sub}</div>
+      </div>
     </div>
   `).join('');
-  list.querySelectorAll('[data-fav]').forEach(el => {
-    el.addEventListener('click', () => {
-      const fav = likedTracks[parseInt(el.dataset.fav)];
-      const idx = playlist.findIndex(t => t.id === fav.id);
-      if (idx >= 0) loadTrack(idx, true);
-      else {
-        playlist.push({ ...fav, album: 'Favorit' });
-        loadTrack(playlist.length - 1, true);
-      }
-      navigateTo('home');
-    });
-  });
 }
 
-function updateStats() {
-  $('statPlaylist').textContent = Object.keys(PLAYLISTS).length;
-  $('statLiked').textContent = likedTracks.length;
-  $('statPlayed').textContent = playedHistory.length;
+// ================== PREMIUM ==================
+const PLANS = [
+  {
+    id: 'mini',
+    name: 'Mini',
+    price: 'Rp 9.900',
+    period: '/minggu',
+    desc: 'Cocok buat coba-coba',
+    features: ['Tanpa iklan', 'Audio 160kbps', 'Skip unlimited'],
+    featured: false
+  },
+  {
+    id: 'individual',
+    name: 'Individual',
+    price: 'Rp 29.900',
+    period: '/bulan',
+    desc: 'Paling worth it buat sehari-hari',
+    features: ['Tanpa iklan', 'Audio 320kbps', 'Skip unlimited', 'Download 100 lagu', 'Equalizer advanced'],
+    featured: true
+  },
+  {
+    id: 'family',
+    name: 'Family',
+    price: 'Rp 49.900',
+    period: '/bulan',
+    desc: 'Sampai 6 akun',
+    features: ['Semua fitur Individual', '6 akun terpisah', 'Download 500 lagu', 'Parental control'],
+    featured: false
+  },
+  {
+    id: 'lifetime',
+    name: 'Lifetime',
+    price: 'Rp 299.900',
+    period: 'sekali bayar',
+    desc: 'Bayar sekali, pake selamanya',
+    features: ['Semua fitur Family', 'Bayar sekali', 'Update selamanya', 'Priority support'],
+    featured: false
+  }
+];
+
+function renderPremiumPlans() {
+  const isPrem = user.premium;
+  const currentPlan = user.plan;
+
+  document.getElementById('premium-plans').innerHTML = PLANS.map(p => {
+    const owned = isPrem && currentPlan === p.id;
+    return `
+      <div class="plan ${p.featured ? 'featured' : ''} ${owned ? 'owned' : ''}">
+        <div class="plan-name">${p.name}</div>
+        <div class="plan-price">${p.price}<span>${p.period}</span></div>
+        <div class="plan-desc">${p.desc}</div>
+        <ul class="plan-features">
+          ${p.features.map(f => `<li>${f}</li>`).join('')}
+        </ul>
+        ${owned
+          ? `<button class="plan-buy-btn owned-btn" disabled>✓ AKTIF</button>`
+          : `<button class="plan-buy-btn" onclick="buyPlan('${p.id}')">PILIH ${p.name.toUpperCase()}</button>`
+        }
+      </div>
+    `;
+  }).join('');
 }
 
-function esc(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+function buyPlan(planId) {
+  const plan = PLANS.find(p => p.id === planId);
+  if (!plan) return;
 
-function showToast(msg, isError) {
-  toastEl.textContent = msg;
-  toastEl.classList.toggle('error', !!isError);
-  toastEl.classList.add('show');
-  clearTimeout(toastEl._t);
-  toastEl._t = setTimeout(() => toastEl.classList.remove('show'), 2200);
+  showModal(
+    '👑',
+    'Konfirmasi Pembelian',
+    `Lo bakal beli paket <b>${plan.name}</b> seharga <b>${plan.price}${plan.period}</b>. Lanjutkan?`,
+    'Bayar Sekarang',
+    () => {
+      closeModal();
+      showToast('⏳ Memproses pembayaran...');
+      setTimeout(() => {
+        user.premium = true;
+        user.plan = planId;
+        localStorage.setItem('zmz_user', JSON.stringify(user));
+        updateUserUI();
+        renderPremiumPlans();
+        showModal(
+          '🎉',
+          'Premium Aktif!',
+          `Selamat! Lo sekarang <b>ZmZ Premium ${plan.name}</b>. Nikmati fitur tanpa batas!`,
+          'Mantap!',
+          () => closeModal()
+        );
+      }, 1500);
+    },
+    true
+  );
 }
 
-/* =========================================================
-   NAVIGATION
-   ========================================================= */
-function navigateTo(page) {
-  document.querySelectorAll('.nav-item').forEach(el => {
-    el.classList.toggle('active', el.dataset.page === page);
-  });
-  document.querySelectorAll('.page').forEach(el => {
-    el.classList.toggle('active', el.id === 'page-' + page);
-  });
-  const titles = { home:'Beranda', search:'Cari', collection:'Koleksi Kamu', profile:'Profile' };
-  $('pageTitle').textContent = titles[page] || 'Beranda';
-  if (page === 'collection') renderCollection();
-  if (page === 'profile') updateStats();
-}
+function updateUserUI() {
+  const badge = document.getElementById('premium-badge-top');
+  const planBadge = document.getElementById('profile-plan-badge');
 
-document.querySelectorAll('.nav-item').forEach(el => {
-  el.addEventListener('click', () => navigateTo(el.dataset.page));
-});
-
-document.querySelectorAll('.pl-item[data-playlist]').forEach(el => {
-  el.addEventListener('click', () => {
-    loadPlaylist(el.dataset.playlist, true);
-    navigateTo('home');
-  });
-});
-
-$('userChip').addEventListener('click', () => navigateTo('profile'));
-
-document.querySelectorAll('#genreChips .chip').forEach(chip => {
-  chip.addEventListener('click', () => {
-    document.querySelectorAll('#genreChips .chip').forEach(c => c.classList.remove('active'));
-    chip.classList.add('active');
-    const genre = chip.dataset.genre;
-    const all = PLAYLISTS.indo.tracks;
-    playlist = genre === 'all' ? [...all] : all.filter(t => t.genre === genre);
-    currentIndex = 0;
-    renderTrackList();
-    if (playlist.length > 0) loadTrack(0, true);
-    else showToast('Tidak ada lagu di genre ini', true);
-  });
-});
-
-document.querySelectorAll('[data-coll]').forEach(chip => {
-  chip.addEventListener('click', () => {
-    document.querySelectorAll('[data-coll]').forEach(c => c.classList.remove('active'));
-    chip.classList.add('active');
-    renderCollection(chip.dataset.coll);
-  });
-});
-
-function renderCollection(type = 'playlists') {
-  const grid = $('collectionGrid');
-  grid.innerHTML = '';
-
-  if (type === 'playlists') {
-    Object.entries(PLAYLISTS).forEach(([key, pl]) => {
-      const card = document.createElement('div');
-      card.className = 'collection-card';
-      card.innerHTML = `
-        <div class="cc-img" style="background:${pl.color};">${pl.emoji}</div>
-        <div class="cc-title">${pl.name}</div>
-        <div class="cc-sub">${pl.tracks.length} lagu</div>
-      `;
-      card.addEventListener('click', () => { loadPlaylist(key, true); navigateTo('home'); });
-      grid.appendChild(card);
-    });
-  } else if (type === 'liked') {
-    if (likedTracks.length === 0) {
-      grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:rgba(255,255,255,0.4);">
-        <div style="font-size:64px;margin-bottom:16px;opacity:0.4;">❤️</div>
-        <h3 style="color:#fff;">Belum ada lagu disukai</h3>
-      </div>`;
-      return;
-    }
-    likedTracks.forEach(t => {
-      const card = document.createElement('div');
-      card.className = 'collection-card';
-      card.innerHTML = `
-        <div class="cc-img"><img src="https://img.youtube.com/vi/${t.id}/default.jpg"></div>
-        <div class="cc-title">${esc(t.title)}</div>
-        <div class="cc-sub">${esc(t.artist)}</div>
-      `;
-      card.addEventListener('click', () => {
-        const idx = playlist.findIndex(x => x.id === t.id);
-        if (idx >= 0) loadTrack(idx, true);
-        else { playlist.push({ ...t, album: 'Favorit' }); loadTrack(playlist.length - 1, true); }
-        navigateTo('home');
-      });
-      grid.appendChild(card);
-    });
-  } else if (type === 'recent') {
-    if (playedHistory.length === 0) {
-      grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:rgba(255,255,255,0.4);">
-        <div style="font-size:64px;margin-bottom:16px;opacity:0.4;">🕒</div>
-        <h3 style="color:#fff;">Belum ada riwayat</h3>
-      </div>`;
-      return;
-    }
-    playedHistory.slice(0, 20).forEach(t => {
-      const card = document.createElement('div');
-      card.className = 'collection-card';
-      card.innerHTML = `
-        <div class="cc-img"><img src="https://img.youtube.com/vi/${t.id}/default.jpg"></div>
-        <div class="cc-title">${esc(t.title)}</div>
-        <div class="cc-sub">${esc(t.artist)}</div>
-      `;
-      card.addEventListener('click', () => {
-        const idx = playlist.findIndex(x => x.id === t.id);
-        if (idx >= 0) loadTrack(idx, true);
-        else { playlist.push({ ...t, album: 'Riwayat' }); loadTrack(playlist.length - 1, true); }
-        navigateTo('home');
-      });
-      grid.appendChild(card);
-    });
+  if (user.premium) {
+    badge.classList.add('show');
+    const plan = PLANS.find(p => p.id === user.plan);
+    planBadge.textContent = '👑 PREMIUM ' + (plan ? plan.name.toUpperCase() : '');
+    planBadge.classList.remove('free');
+  } else {
+    badge.classList.remove('show');
+    planBadge.textContent = 'FREE PLAN';
+    planBadge.classList.add('free');
   }
 }
 
-/* =========================================================
-   SEARCH — pakai Worker (kalau di-set) atau Invidious fallback
-   ========================================================= */
-async function searchYoutube(query) {
-  // Opsi 1: pakai Worker (kalau di-set)
-  if (SEARCH_WORKER) {
-    try {
-      const res = await fetch(`${SEARCH_WORKER}?q=${encodeURIComponent(query)}`);
-      const data = await res.json();
-      if (data.items) {
-        return data.items.map(i => ({
-          id: i.id.videoId,
-          title: i.snippet.title,
-          artist: i.snippet.channelTitle,
-          album: 'YouTube',
-          thumbnail: i.snippet.thumbnails?.default?.url
-        }));
-      }
-    } catch (e) { console.warn('Worker failed:', e.message); }
-  }
-  
-  // Opsi 2: Invidious fallback
-  const instances = [
-    'https://inv.nadeko.net',
-    'https://invidious.nerdvpn.de',
-    'https://yewtu.be',
-    'https://invidious.privacyredirect.com'
-  ];
-  for (const base of instances) {
-    try {
-      const url = `${base}/api/v1/search?q=${encodeURIComponent(query)}&type=video`;
-      const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
-      if (!res.ok) continue;
-      const data = await res.json();
-      if (Array.isArray(data) && data.length > 0) {
-        return data.filter(i => i.videoId).slice(0, 12).map(i => ({
-          id: i.videoId,
-          title: i.title,
-          artist: i.author || 'YouTube',
-          album: 'YouTube',
-          thumbnail: i.videoThumbnails?.[0]?.url || `https://img.youtube.com/vi/${i.videoId}/default.jpg`
-        }));
-      }
-    } catch (e) {
-      console.warn('Instance failed:', base, e.message);
-    }
-  }
-  throw new Error('Semua sumber gagal');
+// ================== PROFILE ==================
+function updateProfileUI() {
+  document.getElementById('profile-name').textContent = user.name;
+  document.getElementById('profile-email').textContent = user.email;
+  document.getElementById('stat-fav').textContent = favorites.length;
+  document.getElementById('stat-recent').textContent = recent.length;
+  updateUserUI();
 }
 
-async function searchAndShow(query, target = 'right') {
-  if (!query.trim()) return;
-  const btn = target === 'right' ? $('searchBtn') : $('searchBtnPage');
-  const resultBox = target === 'right' ? $('searchResults') : $('searchResultsPage');
-  const wrap = target === 'right' ? $('searchResultsWrap') : null;
-  
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>';
-
-  try {
-    const results = await searchYoutube(query);
-    if (results.length === 0) {
-      resultBox.innerHTML = '<div class="info-box">❌ Tidak ada hasil</div>';
-      return;
-    }
-    resultBox.innerHTML = '';
-    results.forEach(r => {
-      const item = document.createElement('div');
-      item.className = 'sr-item';
-      item.innerHTML = `
-        <div class="sr-thumb"><img src="${r.thumbnail}" onerror="this.style.display='none';"></div>
-        <div class="sr-info">
-          <div class="sr-title">${esc(r.title)}</div>
-          <div class="sr-channel">${esc(r.artist)}</div>
-        </div>
-        <button class="sr-add">+</button>
-      `;
-      item.querySelector('.sr-add').addEventListener('click', (e) => { e.stopPropagation(); addTrack(r, false); });
-      item.addEventListener('click', () => addTrack(r, true));
-      resultBox.appendChild(item);
-    });
-    if (wrap) wrap.style.display = 'block';
-    if (target === 'page') $('searchResultTitle').textContent = `Hasil: "${query}"`;
-    showToast(`✅ ${results.length} hasil ditemukan`);
-  } catch (err) {
-    console.error(err);
-    resultBox.innerHTML = '<div class="info-box">❌ Gagal mencari. Coba lagi.</div>';
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '→';
-  }
+function clearData() {
+  showModal(
+    '⚠️',
+    'Hapus Semua Data?',
+    'Favorit, recent, dan status premium lo bakal hilang. Yakin?',
+    'Hapus',
+    () => {
+      localStorage.clear();
+      favorites = [];
+      recent = [];
+      user = { name: 'ZmZ User', email: 'user@zmz.music', premium: false, plan: null };
+      updateLibraryUI();
+      updateUserUI();
+      renderPremiumPlans();
+      closeModal();
+      showToast('✅ Data dihapus');
+    },
+    true
+  );
 }
 
-function quickSearch(q) {
-  $('searchInputPage').value = q;
-  searchAndShow(q, 'page');
+// ================== MUTE ==================
+function toggleMute() {
+  if (!player) return;
+  isMuted = !isMuted;
+  if (isMuted) player.mute();
+  else player.unMute();
+  document.getElementById('np-mute').textContent = isMuted ? '🔇' : '🔊';
 }
 
-function addTrack(track, playNow) {
-  const exists = playlist.find(t => t.id === track.id);
-  if (exists) {
-    showToast('ℹ Sudah ada');
-    if (playNow) loadTrack(playlist.indexOf(exists), true);
-    return;
-  }
-  playlist.push(track);
-  renderTrackList();
-  updateStats();
-  showToast('✅ Ditambahkan');
-  if (playNow) { loadTrack(playlist.length - 1, true); navigateTo('home'); }
+// ================== MODAL ==================
+let modalCallback = null;
+
+function showModal(icon, title, desc, btnText, callback, showCancel = false) {
+  document.getElementById('modal-icon').textContent = icon;
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-desc').innerHTML = desc;
+  document.getElementById('modal-btn-primary').textContent = btnText;
+  document.getElementById('modal-btn-secondary').style.display = showCancel ? 'block' : 'none';
+  document.getElementById('modal').classList.add('show');
+  modalCallback = callback;
+
+  document.getElementById('modal-btn-primary').onclick = () => {
+    if (modalCallback) modalCallback();
+  };
 }
 
-/* =========================================================
-   EVENTS
-   ========================================================= */
-$('playBtn').addEventListener('click', togglePlay);
-$('bigPlay').addEventListener('click', togglePlay);
-$('nextBtn').addEventListener('click', nextTrack);
-$('prevBtn').addEventListener('click', prevTrack);
-$('npLike').addEventListener('click', () => toggleLike());
+function closeModal() {
+  document.getElementById('modal').classList.remove('show');
+  modalCallback = null;
+}
 
-$('shuffleBtn').addEventListener('click', () => {
-  isShuffle = !isShuffle;
-  $('shuffleBtn').classList.toggle('on', isShuffle);
-  $('shuffleBig').classList.toggle('on', isShuffle);
-  showToast(isShuffle ? '🔀 Shuffle ON' : 'Shuffle OFF');
-});
-$('shuffleBig').addEventListener('click', () => $('shuffleBtn').click());
-
-$('repeatBtn').addEventListener('click', () => {
-  isRepeat = !isRepeat;
-  $('repeatBtn').classList.toggle('on', isRepeat);
-  $('repeatBig').classList.toggle('on', isRepeat);
-  showToast(isRepeat ? '🔁 Repeat ON' : 'Repeat OFF');
-});
-$('repeatBig').addEventListener('click', () => $('repeatBtn').click());
-
-$('progressBar').addEventListener('click', (e) => {
-  if (!playerReady || !ytPlayer.getDuration) return;
-  const rect = $('progressBar').getBoundingClientRect();
-  const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-  const dur = ytPlayer.getDuration();
-  if (dur) ytPlayer.seekTo(pct * dur, true);
+document.getElementById('modal-btn-secondary').onclick = closeModal;
+document.getElementById('modal').addEventListener('click', (e) => {
+  if (e.target.id === 'modal') closeModal();
 });
 
-$('volBar').addEventListener('click', (e) => {
-  const rect = $('volBar').getBoundingClientRect();
-  const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-  $('volFill').style.width = (pct * 100) + '%';
-  if (playerReady) ytPlayer.setVolume(pct * 100);
+// ================== TOAST ==================
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ================== HELPERS ==================
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function toggleTheme() {
+  showToast('🎛️ Equalizer coming soon');
+}
+
+// ================== SEARCH INPUT ==================
+document.getElementById('search-input').addEventListener('keypress', e => {
+  if (e.key === 'Enter') doSearch();
+});
+document.getElementById('search-input').addEventListener('input', e => {
+  const clear = document.getElementById('search-clear');
+  if (e.target.value.length > 0) clear.classList.add('show');
+  else clear.classList.remove('show');
+
+  clearTimeout(e.target._t);
+  e.target._t = setTimeout(() => {
+    if (e.target.value.trim().length >= 3) doSearch();
+  }, 700);
 });
 
-$('searchBtn').addEventListener('click', () => searchAndShow($('searchInput').value, 'right'));
-$('searchInput').addEventListener('keypress', e => { if (e.key === 'Enter') searchAndShow($('searchInput').value, 'right'); });
-$('searchBtnPage').addEventListener('click', () => searchAndShow($('searchInputPage').value, 'page'));
-$('searchInputPage').addEventListener('keypress', e => { if (e.key === 'Enter') searchAndShow($('searchInputPage').value, 'page'); });
-
-document.querySelectorAll('.pick').forEach(p => {
-  p.addEventListener('click', () => { $('searchInput').value = p.dataset.q; searchAndShow(p.dataset.q, 'right'); });
-});
-
-document.addEventListener('keydown', e => {
+// ================== KEYBOARD ==================
+document.addEventListener('keydown', (e) => {
   if (e.target.tagName === 'INPUT') return;
   if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
-  else if (e.code === 'ArrowRight') nextTrack();
-  else if (e.code === 'ArrowLeft') prevTrack();
+  if (e.code === 'KeyM') toggleMute();
+  if (e.code === 'Escape') closeNowPlaying();
 });
-
-/* Init */
-renderTrackList();
 </script>
-
 </body>
-</html>
+ </html>
